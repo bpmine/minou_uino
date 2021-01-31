@@ -26,4 +26,4 @@ Un connecteur a permis d'interragir avec la tour dans le jeu minetest. Par exemp
 
 Le prochain projet sera de remplacer le datalogger par une carte wifi.
 
-On pourra piloter les LEDs de la cabane et relever les valeurs des capteur par le réseau.
+On pourra piloter les LEDs de la cabane et relever les valeurs des capteurs par le réseau.
