@@ -1,6 +1,12 @@
 # minou_uino - Domotique pour la cabane du minou
 
-Les programmes de cette base gère la cabane de notre minou (voir image suivante).
+Les programmes de cette base gère la cabane de notre minou (voir images suivantes).
+
+![GitHub Logo](/images/divers_cabane.png)
+
+![GitHub Logo](/images/equip_cabane.PNG)
+
+![GitHub Logo](/images/nuit_cabane.PNG)
 
 ## Datalogger
 
@@ -13,4 +19,5 @@ Il pilotait également deux bandeaux à LEDs et un éclairage intérieur.
 Le second projet est un eclairage de la tour piloté par Wifi.
 
 ## Cabane connectee
+
 
