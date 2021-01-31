@@ -4,20 +4,26 @@ Les programmes de cette base gère la cabane de notre minou (voir images suivant
 
 ![GitHub Logo](/images/divers_cabane.png)
 
+## Datalogger
+
+Le premier projet est un datalogger pour relever les temperatures et humidités à différents emplacements de la cabane.
+
+Il pilotait également deux bandeaux à LEDs et un éclairage intérieur.
+
 ![GitHub Logo](/images/equip_cabane.PNG)
 
 ![GitHub Logo](/images/nuit_cabane.PNG)
-
-## Datalogger
-
-Le premier projet etait un datalogger pour relever les temperatures et humidités à différents emplacements de la cabane.
-
-Il pilotait également deux bandeaux à LEDs et un éclairage intérieur.
 
 ## Eclairage de la tour
 
 Le second projet est un eclairage de la tour piloté par Wifi.
 
+Un connecteur a permis d'interragir avec la tour dans le jeu minetest. Par exemple, lorsqu'un joueur casse un bloc, les LEDs deviennent rouge.
+
+![GitHub Logo](/images/tour_cabane.png)
+
 ## Cabane connectee
 
+Le prochain projet sera de remplacer le datalogger par une carte wifi.
 
+On pourra piloter les LEDs de la cabane et relever les valeurs des capteur par le réseau.
