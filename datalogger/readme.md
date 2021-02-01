@@ -10,14 +10,21 @@ Le datalogger a pour fonction d'enregistrer les valeurs des differents capteurs 
 
 Le datalogger enregistre les valeurs des capteurs suivants.
 
+** A l'intérieur **
 Type|Emplacement|Description
 -|-|-
 DHT11|Intérieur bas|Mesure de la température à l'intérieur
 DHT11|Intérieur bas|Mesure de l'humidité à l'intérieur
 PIR|Intérieur bas|Détection de mouvement en bas
 SWITCH|Intérieur bas|Détection de l'ouverture du couvercle
+
+** Au milieu **
+Type|Emplacement|Description
 -|-|-
 PIR|Intérieur milieu|Détection de mouvement au milieu
+
+** A l'extérieur **
+Type|Emplacement|Description
 -|-|-
 DHT11|Extérieur|Mesure de la température à l'extérieur
 DHT11|Extérieur|Mesure de l'humidité à l'extérieur
@@ -25,10 +32,14 @@ Photoresistance|Extérieur|Mesure de l'éclairage extérieur
 
 ### Commandes
 
+** A l'intérieur **
 Type|Emplacement|Description
 -|-|-
 DHT11|Intérieur bas|Bandeau de 26 LEDs RGB
 LED Blanche|Intérieur bas|LED blanche (témoin d'ouverture du couvercle)
+
+** Au milieu **
+Type|Emplacement|Description
 -|-|-
 DHT11|Intérieur milieu|Bandeau de 26 LEDs RGB
 
