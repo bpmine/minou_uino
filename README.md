@@ -1,6 +1,6 @@
 # minou_uino - Domotique pour la cabane du minou
 
-Les programmes de cette base gère la cabane de notre minou (voir images suivantes).
+Les programmes de cette base gèrent la cabane de notre minou (voir images suivantes).
 
 ![GitHub Logo](/images/divers_cabane.png)
 
@@ -18,7 +18,7 @@ Il pilotait également deux bandeaux à LEDs et un éclairage intérieur.
 
 Le second projet est un eclairage de la tour piloté par Wifi.
 
-Un connecteur a permis d'interragir avec la tour dans le jeu minetest. Par exemple, lorsqu'un joueur casse un bloc, les LEDs deviennent rouge.
+Un connecteur logiciel permet d'interragir avec la tour dans le jeu minetest. Par exemple, lorsqu'un joueur casse un bloc, les LEDs deviennent rouge.
 
 ![GitHub Logo](/images/tour_cabane.png)
 
