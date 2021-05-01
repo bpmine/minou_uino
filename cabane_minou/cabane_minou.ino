@@ -7,20 +7,27 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>
 
-//#include <Wire.h>
+#include "DHTesp.h"
+#include <uri/UriBraces.h>
+#include "ldserver.h"
 
 //#define FASTLED_ESP8266_NODEMCU_PIN_ORDER
 #define FASTLED_ESP8266_D1_PIN_ORDER
 //#define FASTLED_ESP8266_RAW_PIN_ORDER
 #include "FastLED.h"
-
+#include "timer.h"
 #include "ldanim.h"
 
 #include "wifi_code.h"
 
+#include "move.h"
+
+
 //#define PIN_BUTTON        D8
-#define PIN_LUM           A0
+#define PIN_DARK          A0
 
 #define PIN_MOVE_HAUT     D1
 #define PIN_DATA_LED_BAS  D2 
@@ -29,16 +36,17 @@
 #define PIN_DATA_LED_HAUT D6
 #define PIN_DHT11_BAS     D7
 
-#define PIN_MOVE_BAS      9  //D8  /// Pullup obligatoire sur circuit
+#define PIN_MOVE_BAS      9   /// Pullup obligatoire sur circuit
 #define PIN_DHT11_OUT     10
-
-
 
 
 const char* ssid = STASSID;
 const char* password = STAPSK;
 
 ESP8266WebServer server(80);
+
+Timer wdg=Timer(3600*1000U);
+Timer mvtmr=Timer(30000U);
 
 
 /**
@@ -56,21 +64,26 @@ CRGB leds_haut[NUM_LEDS];
  * @}
 */
 
-/**
- * @brief Gestion du watchdog
- * @{
-*/
-bool g_flgWdg=true;
-long g_t0_ms=0;
-long g_delay_ms=3600L*1000L;
-/**
- * @}
-*/
+
+DHTesp dht_bas;
+DHTesp dht_out;
+byte g_in_humBas=0;
+byte g_in_tempBas=0;
+byte g_in_humOut=0;
+byte g_in_tempOut=0;
+bool g_flgCapot=false;
+
+int g_darkness=0;
+
+Move mvHaut=Move();
+Move mvBas=Move();
 
 #define SIZE_PROG (500)
-char prog[SIZE_PROG] = "S26E33LrOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LgOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LbOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOW*";
-bool flg_runProg=false;
-LdAnim anim = LdAnim(leds_haut, NUM_LEDS);
+char prog_haut[SIZE_PROG] = "S26E33LrOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LgOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LbOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOW*";
+char prog_bas[SIZE_PROG] = "S26E33LrOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LgOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LbOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOW*";
+
+LdServer ldsrv_bas=LdServer(&server,leds_bas,NUM_LEDS,prog_bas,"bas");
+LdServer ldsrv_haut=LdServer(&server,leds_haut,NUM_LEDS,prog_haut,"haut");
 
 /**
  * @brief Allume toutes les LEDs avec la couleur fournie
@@ -95,237 +108,6 @@ void clearAll(CRGB *pLeds)
 }
 
 /**
- * @brief Controleur WS /leds/write
- * 
- * Ecrit toutes les LEDS
- * La data dans le post est une suite d'octets codes en hexadecimal
- * Trame: AA[Taille][R0][G0][B0]...[Rn][Gn][Bn]
- * 
- * Retourne "OK" si pris en compte
- * 
- * Exemple: AA06000000FF0000 => LED 0 eteinte et LED 1 en rouge
-*/
-void handleWrite()
-{  
-  if (g_flgWdg==true)
-    g_t0_ms=millis();
-  
-  if (server.hasArg("plain")== false)
-  {  
-    server.send(200, "text/plain", "Body not received");
-    return;
-  }
-
-  const char *pCmd=server.arg("plain").c_str();
-
-  int tmp=0;  
-  sscanf(pCmd,"%02x",&tmp);
-  if (tmp!=0xAA)
-  {  
-    server.send(200, "text/plain", "Bad magic");
-    return;
-  }
-
-  int len=0;
-  sscanf(pCmd+2,"%02x",&len);
-  Serial.print("Len:");
-  Serial.println(len);
-  
-  for (int i=0;i<len;i++)
-  {
-    if (i>NUM_LEDS)
-      break;
-      
-    int r,g,b;
-    char strVals[10];
-    memcpy(strVals,pCmd+4+(i*6),6);
-    strVals[6]=0;
-    Serial.println(strVals);
-
-    if (sscanf(strVals,"%02x%02x%02x",&r,&g,&b)==3)
-    {
-      Serial.print(i);
-      Serial.print(" ");
-      Serial.print("RGB: ");
-      Serial.print(r);
-      Serial.print(" ");
-      Serial.print(g);
-      Serial.print(" ");
-      Serial.println(b);
-
-      leds_haut[i]=CRGB(r,g,b);
-    }
-  }
-  
-  FastLED.show();
-  
-  server.send(200, "text/plain", "OK");
-}
-
-/**
- * @brief Controleur /leds/set
- * 
- * Parametres de la requete (dans l'URL):
- *   - start: première LED de la selection
- *   - end: derniere LED de la selection
- *   - col: Couleur a appliquer 
- *       - g: Vert
- *       - b: Bleu
- *       - w: Blanc
- *       - r: Rouge
- *       - 0: Etaint (zero)
- *       - y: Jaune
- *       - o: Orange
- *       - p: Rose
- *       - c: Cyan
- *       - v: Violet
- *   - r: Composante rouge
- *   - g: composante verte
- *   - b: composante bleue
- *   
- *   RETOURNE un JSON avec les valeurs appliquees en cas de reussite sinon ERROR
- *   
- *   Exemples: 
- *     /leds/set?start=0&end=33&col=r  => les LEDs 0 a 33 en rouge
- *     /leds/set?start=0&end=15&r=0&g=127&b=0  => les LEDs 0 a 15 en vert
-*/
-void handleSetLeds()
-{
-  if (g_flgWdg==true)
-    g_t0_ms=millis();
-
-  int start=-1,end=-1,r=-1,g=-1,b=-1;
-  
-  for (int i = 0; i < server.args(); i++) 
-  {
-    if (strcmp(server.argName(i).c_str(),"start")==0)
-    {
-      sscanf(server.arg(i).c_str(),"%d",&start);
-    }
-    else if (strcmp(server.argName(i).c_str(),"col")==0)
-    {
-      if (strcmp(server.arg(i).c_str(),"r")==0)
-      {
-        r=127;
-        g=0;
-        b=0;    
-      }
-      else if (strcmp(server.arg(i).c_str(),"g")==0)
-      {
-        r=0;
-        g=127;
-        b=0;    
-      }
-      else if (strcmp(server.arg(i).c_str(),"b")==0)
-      {
-        r=0;
-        g=0;
-        b=127;    
-      }
-      else if (strcmp(server.arg(i).c_str(),"w")==0)
-      {
-        r=127;
-        g=127;
-        b=127;    
-      }
-      else if (strcmp(server.arg(i).c_str(),"0")==0)
-      {
-        r=0;
-        g=0;
-        b=0;    
-      }
-      else if (strcmp(server.arg(i).c_str(),"y")==0)
-      {
-        r=127;
-        g=127;
-        b=0;    
-      }
-      else if (strcmp(server.arg(i).c_str(),"o")==0)
-      {
-        r=127;
-        g=82;
-        b=0;    
-      }
-      else if (strcmp(server.arg(i).c_str(),"p")==0)
-      {
-        r=127;
-        g=9;
-        b=73;    
-      }
-      else if (strcmp(server.arg(i).c_str(),"c")==0)
-      {
-        r=0;
-        g=127;
-        b=127;    
-      }
-      else if (strcmp(server.arg(i).c_str(),"v")==0)
-      {
-        r=127;
-        g=0;
-        b=127;    
-      }
-    }
-    else if (strcmp(server.argName(i).c_str(),"r")==0)
-    {
-      sscanf(server.arg(i).c_str(),"%d",&r);
-    }
-    else if (strcmp(server.argName(i).c_str(),"g")==0)
-    {
-      sscanf(server.arg(i).c_str(),"%d",&g);
-    }
-    else if (strcmp(server.argName(i).c_str(),"b")==0)
-    {
-      sscanf(server.arg(i).c_str(),"%d",&b);
-    }
-    else if (strcmp(server.argName(i).c_str(),"end")==0)
-    {
-      sscanf(server.arg(i).c_str(),"%d",&end);
-    }
-  }
-
-  if ( (start!=-1) && (r!=-1) && (g!=-1) && (b!=-1) )
-  {
-    if (start>=NUM_LEDS)
-      start=NUM_LEDS-1;
-    
-    if (end==-1)
-      end=start;
-  
-    if (end>=NUM_LEDS)
-      end=NUM_LEDS-1;
-
-    if (end<start)
-      end=start;
-
-    for (int i=start;i<=end;i++)
-    {
-      leds_haut[i]=CRGB(r,g,b);
-    }
-
-    FastLED.show();
-
-    String s="{";
-    s+="start=";
-    s+=start;
-    s+=", end=";
-    s+=end;
-    s+=", rgb=\"(";
-    s+=r;
-    s+=",";
-    s+=g;
-    s+=",";
-    s+=b;
-    s+=")\"";
-    s+="}";
-    
-    server.send(200, "text/plain", s);
-    return;
-  }
-  
-  server.send(400, "text/plain", "ERROR");
-}
-
-/**
  * @brief Controleur WS /leds/wdg/info
  * 
  * Retourne les informations du watchdog
@@ -338,15 +120,13 @@ void handleSetLeds()
  * 
 */
 void handleWdgInfo()
-{
-  long delta=(millis()-g_t0_ms)/1000;
-  
+{ 
   String s="{\"enabled\"=\"";
-  s+=g_flgWdg;
-  s+="\", \"delay\"=\"";
-  s+=(g_delay_ms/1000);
-  s+="\", \"elapsed\"=\"";
-  s+=delta;  
+  s+=wdg.isRunning();
+  s+="\", \"duration\"=\"";
+  s+=wdg.getDuration_ms()/1000U;
+  s+="\", \"remaining\"=\"";
+  s+=wdg.getRemaining_ms()/1000U;  
   s+="\"}";
   
   server.send(200, "text/plain", s);
@@ -365,7 +145,11 @@ void handleWdg()
 {
   if (server.args()==0)
   {
+    if (wdg.isRunning()==true)
+      wdg.start();
+      
     server.send(200, "text/plain", "WDG OK");
+    
     return;
   }
   else if (server.args()==1)
@@ -374,14 +158,13 @@ void handleWdg()
     {
       if (strcmp(server.arg(0).c_str(),"1")==0)
       {
-        g_flgWdg=true;
-        g_t0_ms=millis();
+        wdg.start();
         server.send(200, "text/plain", "WDG ENABLED");
         return;
       }
       else
       {
-        g_flgWdg=false;
+        wdg.stop();
         server.send(200, "text/plain", "WDG DISABLED");
         return;
       }
@@ -391,9 +174,11 @@ void handleWdg()
       long delay_s=0;
       if (sscanf(server.arg(0).c_str(),"%ld",&delay_s)==1)
       {
-        g_flgWdg=true;
-        g_delay_ms=delay_s*1000L;
-        g_t0_ms=millis();
+        unsigned long delay_ms=delay_s*1000L;
+
+        wdg.setDuration(delay_ms);
+        wdg.start();
+        
         String s="WDG DELAY ";
         s+=delay_s;
         s+=" seconds";
@@ -411,12 +196,49 @@ void handleWdg()
 */
 void handleClearAll()
 {  
-  clearAll(leds_haut);
-  clearAll(leds_bas);
+  String lds=server.pathArg(0);
+  if (lds=="haut")
+  {
+    ldsrv_haut.handleClearAll();
+    server.send(200, "text/plain", "OK");
+  }
+  if (lds=="bas")
+  {
+    ldsrv_bas.handleClearAll();
+    server.send(200, "text/plain", "OK");
+  }
+  else
+  {
+    server.send(400, "text/plain", "ERROR BAD PARAMETER");    
+  }
   FastLED.show();
     
-  server.send(200, "text/plain", "OK");
 }
+
+/**
+ * @brief Controleur /leds/set
+*/
+void handleSetLeds()
+{
+  if (wdg.isRunning()==true)
+    wdg.start();
+
+  String lds=server.pathArg(0);
+  if (lds=="haut")
+  {
+    ldsrv_haut.handlerSetLeds();
+  }  
+  if (lds=="bas")
+  {
+    ldsrv_bas.handlerSetLeds();
+  }  
+  else
+  {
+    server.send(400, "text/plain", "ERROR UNKNOWN LED SET");
+    return;
+  }
+}
+
 
 /**
  * @brief Controlleur WS informations
@@ -425,15 +247,45 @@ void handleClearAll()
 */
 void handleInfo()
 {      
-  String s="{";
-  s+="'name':'LedsTourMinou',";
-  s+="'description':'Gestion des LEDs de la tour du minou'";
+  String s="[{";
+  s+="'name':'haut',";
+  s+="'description':'Gestion des LEDs du haut de la cabane du minou'";
   s+="'num_leds':'";
   s+=NUM_LEDS;
   s+="'";
   s+="}";
+  s+="',{name':'bas',";
+  s+="'description':'Gestion des LEDs du bas de la cabane du minou'";
+  s+="'num_leds':'";
+  s+=NUM_LEDS;
+  s+="'";
+  s+="}]";
   
   server.send(200, "text/plain", s);
+}
+
+void handleSensors(void)
+{
+  String s="{";
+  s+="'temp_out':";
+  s+=g_in_tempOut;
+  s+=",'temp_bas':";
+  s+=g_in_tempBas;
+  s+=",'hum_out':";
+  s+=g_in_humOut;
+  s+=",'hum_bas':";
+  s+=g_in_humBas;
+  s+=",'capot':";
+  s+=g_flgCapot;
+  s+=",'darkness':";
+  s+=g_darkness;
+  s+=",'move_haut':";
+  s+=mvHaut.getCount();
+  s+=",'move_bas':";
+  s+=mvBas.getCount();
+  s+="}";  
+  
+  server.send(200, "text/plain", s);  
 }
 
 /**
@@ -445,7 +297,7 @@ void handleInfo()
  * - /leds/anim?enable=1 => Active l'animation. Retourne ANIM ENABLED ou ANIM DISABLED
  * - /leds/anim?info => Retourne la configuration de l'animation
 */
-void handleAnim()
+/*void handleAnim()
 {
   if (server.args()==1)
   {
@@ -483,7 +335,7 @@ void handleAnim()
     }
   }
   server.send(400, "text/plain", "ERROR");     
-}
+}*/
 
 /**
  * @brief Controleur WS en cas d'erreur
@@ -504,6 +356,17 @@ void handleNotFound()
   server.send(404, "text/plain", message);
 }
 
+void latch_value(byte *i_pOutVal,byte i_iNewValue)
+{
+  byte old=(*i_pOutVal);
+  if ( (old!=i_iNewValue) && ( ((i_iNewValue!=0) && (i_iNewValue!=255) ) || (abs(i_iNewValue-old)<2) ) )
+  {
+    (*i_pOutVal)=i_iNewValue;
+  }
+}
+
+
+
 /**
  * @brief Setup d'initialisation de l'arduino
 */
@@ -517,16 +380,20 @@ void setup(void)
   pinMode(PIN_LED_BAS, OUTPUT);
   digitalWrite(PIN_LED_BAS, LOW);
 
-  pinMode(PIN_LUM, INPUT);
-  //pinMode(PIN_BUTTON, INPUT_PULLUP);
-  pinMode(PIN_DHT11_OUT, INPUT_PULLUP);
+  pinMode(PIN_DARK, INPUT);
 
-  pinMode(PIN_MOVE_BAS, INPUT_PULLUP);
-  pinMode(PIN_MOVE_HAUT, INPUT_PULLUP);
-  pinMode(PIN_DHT11_BAS, INPUT_PULLUP);
-  pinMode(PIN_CAPOT, INPUT_PULLUP);
+  pinMode(PIN_MOVE_BAS, INPUT);
+  pinMode(PIN_MOVE_HAUT, INPUT);
+  mvHaut.begin(PIN_MOVE_HAUT);
+  mvBas.begin(PIN_MOVE_BAS);
 
-  //Wire.begin();
+  pinMode(PIN_DHT11_BAS, INPUT);
+  pinMode(PIN_DHT11_OUT, INPUT);
+  
+  pinMode(PIN_CAPOT, INPUT);
+
+  dht_bas.setup(PIN_DHT11_BAS, DHTesp::DHT11);
+  dht_out.setup(PIN_DHT11_OUT, DHTesp::DHT11);
 
   FastLED.addLeds<NEOPIXEL, PIN_DATA_LED_BAS>(leds_bas, NUM_LEDS); 
   FastLED.addLeds<NEOPIXEL, PIN_DATA_LED_HAUT>(leds_haut, NUM_LEDS); 
@@ -562,29 +429,73 @@ void setup(void)
     Serial.println("MDNS responder started");
   }
 
-/*  server.on("/leds/write", handleWrite);
-  server.on("/leds/clearall", handleClearAll);
+  ldsrv_bas.init();
+
+  server.on(UriBraces("/leds/{}/clearall"), handleClearAll);
+  //server.on(UriBraces("/leds/{}/anim"), handleAnim); 
+  server.on(UriBraces("/leds/{}/set"), handleSetLeds);
+  
   server.on("/leds/info", handleInfo);
-  server.on("/leds/set", handleSetLeds);
   server.on("/leds/wdg", handleWdg);
   server.on("/leds/wdg/info", handleWdgInfo);  
-  server.on("/leds/anim", handleAnim); 
   
+  server.on("/sensors", handleSensors);  
+
   server.onNotFound(handleNotFound);
 
   server.begin();
-  Serial.println("HTTP server started");  */
+  Serial.println("HTTP server started");
 
-  g_t0_ms=millis();
+  wdg.stop();
+
+  //ArduinoOTA.setHostname("CabaneMinou");
+  ArduinoOTA.setHostname(OTA_NAME);
+
+  // No authentication by default
+  ArduinoOTA.setPassword((const char *)"123");
+
+  ArduinoOTA.onStart([]() {
+    Serial.println("Start");
+  });
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\nEnd");
+  });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+    else if (error == OTA_END_ERROR) Serial.println("End Failed");
+  });
+  ArduinoOTA.begin();
 }
 
 /**
  * @loop Boucle principale de l'arduino
 */
-void loop(void) 
+void test_loop(void) 
 {
+  static int cnt=200;
+  static int tst_etat=0;
+
+  TempAndHumidity newValues = dht_bas.getTempAndHumidity();
+  latch_value(&g_in_humBas,(byte)newValues.humidity);
+  latch_value(&g_in_tempBas,(byte)newValues.temperature);
+  
+  newValues = dht_out.getTempAndHumidity();
+  latch_value(&g_in_humOut,(byte)newValues.humidity);
+  latch_value(&g_in_tempOut,(byte)newValues.temperature);
+
+  g_darkness=analogRead(PIN_DARK);
+  Serial.println(g_darkness);
+
   delay(10);
-  if ( (digitalRead(PIN_CAPOT)==0) )
+  
+  if ( (digitalRead(PIN_CAPOT)==HIGH) )
   {
     digitalWrite(PIN_LED_BAS,HIGH);
   }
@@ -593,65 +504,132 @@ void loop(void)
     digitalWrite(PIN_LED_BAS,LOW);
   }
 
-  if (digitalRead(PIN_DHT11_OUT)==LOW)
+  if (mvHaut.tick()==true)
   {
-    Serial.println("DHT11 OUT");
-    delay(1000);
+    Serial.println("Move Haut");
   }
   
-  if (digitalRead(PIN_DHT11_BAS)==LOW)
+  if (mvBas.tick()==true)
   {
-    Serial.println("DHT11 BAS");
-    delay(1000);
+    Serial.println("Move Bas");
   }
 
-  if (digitalRead(PIN_MOVE_BAS)==LOW)
-  {
-    Serial.println("MOVE BAS");
-    delay(1000);
-  }
+  FastLED.show();
 
-  if (digitalRead(PIN_MOVE_HAUT)==LOW)
+  cnt--;
+  if (cnt<=0)
   {
-    Serial.println("MOVE HAUT");
-    delay(1000);
-  }
+    cnt=400;
+    if (tst_etat==0)
+    {
+      setAll(leds_bas,CRGB::Red);
+      setAll(leds_haut,CRGB::Blue);
+      tst_etat=1;
 
-  if (digitalRead(PIN_CAPOT)==LOW)
-  {
-    Serial.println("CAPOT");
-    delay(100);
-  }
-  if (digitalRead(PIN_BUTTON)==LOW)
-  {
-    Serial.println("BUTTON");
-    delay(000);
-  }
+      Serial.print("Hum bas:");
+      Serial.println(g_in_humBas);
+      Serial.print("Tmp bas:");
+      Serial.println(g_in_tempBas);
 
-  /*server.handleClient();
+      Serial.print("Hum out:");
+      Serial.println(g_in_humOut);
+      Serial.print("Tmp out:");
+      Serial.println(g_in_tempOut);
+
+      Serial.print("Dark:");
+      Serial.println(g_darkness);
+      
+      Serial.print("Move Bas:");
+      Serial.println(mvBas.getCount());
+      Serial.print("Move Haut:");
+      Serial.println(mvHaut.getCount());
+
+      Serial.println("");
+    }
+    else    
+    {
+      clearAll(leds_bas);
+      clearAll(leds_haut);
+      tst_etat=0;
+    }    
+  }
+}
+
+void wdgSwitchAllOff()
+{  
+  clearAll(leds_bas);
+  clearAll(leds_haut);
+}
+
+void loop_app()
+{
+  TempAndHumidity newValues = dht_bas.getTempAndHumidity();
+  latch_value(&g_in_humBas,(byte)newValues.humidity);
+  latch_value(&g_in_tempBas,(byte)newValues.temperature);
+  
+  newValues = dht_out.getTempAndHumidity();
+  latch_value(&g_in_humOut,(byte)newValues.humidity);
+  latch_value(&g_in_tempOut,(byte)newValues.temperature);
+
+  g_flgCapot=(digitalRead(PIN_CAPOT)==HIGH)?true:false;
+
+  g_darkness=analogRead(PIN_DARK);
+  Serial.println(g_darkness);
+
+  if (wdg.isRunning()==false)
+  {
+    if (mvHaut.tick()==true)
+    {
+      mvtmr.start();
+      setAll(leds_haut,CRGB::Green);
+      Serial.println("Move Haut");
+    }
+  
+    if (mvBas.tick()==true)
+    {
+      mvtmr.start();
+      setAll(leds_haut,CRGB::Red);
+      Serial.println("Move Bas");
+    }
+  }    
+
+  if (mvtmr.tick()==true)
+  { 
+      Serial.println("Timer move off");     
+      clearAll(leds_haut);
+      clearAll(leds_bas);
+  }
+  
+  server.handleClient();
   MDNS.update();
 
-  if (flg_runProg==true)
+  /*if (flg_runProg==true)
   {
     anim.tick();
     delay(20);
+  }*/
+
+  if (wdg.tick()==true)
+  {
+    wdgSwitchAllOff();    
   }
 
-  if (g_flgWdg==true)
+  FastLED.show();
+
+  ArduinoOTA.handle();
+
+  if ( g_flgCapot==true )
   {
-    long t=millis();
-    long delta=0;
-    if (t>g_t0_ms)
-      delta=t-g_t0_ms;
-    else
-      delta=0xFFFFFFFF-g_t0_ms+t;
-    
-    if (delta>g_delay_ms)
-    {
-      g_t0_ms=millis();
-      clearAll(leds);
-      flg_runProg=false;
-      FastLED.show();
-    }    
-  }*/
+    digitalWrite(PIN_LED_BAS,HIGH);
+  }
+  else
+  {
+    digitalWrite(PIN_LED_BAS,LOW);
+  }  
+}
+
+void loop()
+{
+  loop_app();
+  //test_loop();
 }

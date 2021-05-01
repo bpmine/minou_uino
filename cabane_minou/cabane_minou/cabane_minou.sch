@@ -36,8 +36,8 @@ $Comp
 L Device:R R2
 U 1 1 6046DFE9
 P 3950 750
-F 0 "R2" H 4020 796 50  0000 L CNN
-F 1 "R" H 4020 705 50  0000 L CNN
+F 0 "R2" V 4100 600 50  0000 L CNN
+F 1 "100k" V 4100 800 50  0000 L CNN
 F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P2.54mm_Vertical" V 3880 750 50  0001 C CNN
 F 3 "~" H 3950 750 50  0001 C CNN
 	1    3950 750 
@@ -65,34 +65,12 @@ F 3 "" H 3100 750 50  0001 C CNN
 	1    3100 750 
 	0    1    1    0   
 $EndComp
-$Comp
-L Device:D_Zener D1
-U 1 1 60470D30
-P 3450 750
-F 0 "D1" V 3404 830 50  0000 L CNN
-F 1 "1V" V 3495 830 50  0000 L CNN
-F 2 "Diode_THT:D_A-405_P2.54mm_Vertical_AnodeUp" H 3450 750 50  0001 C CNN
-F 3 "~" H 3450 750 50  0001 C CNN
-	1    3450 750 
-	-1   0    0    1   
-$EndComp
 Wire Wire Line
 	3800 750  3750 750 
 Wire Wire Line
 	3300 750  3100 750 
 Wire Wire Line
 	4250 750  4100 750 
-$Comp
-L Device:R R1
-U 1 1 604719A0
-P 3450 1350
-F 0 "R1" V 3243 1350 50  0000 C CNN
-F 1 "R" V 3334 1350 50  0000 C CNN
-F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P2.54mm_Vertical" V 3380 1350 50  0001 C CNN
-F 3 "~" H 3450 1350 50  0001 C CNN
-	1    3450 1350
-	0    1    1    0   
-$EndComp
 Wire Wire Line
 	3750 1350 3750 750 
 Connection ~ 3750 750 
@@ -531,8 +509,8 @@ $Comp
 L Device:R R6
 U 1 1 604CDE74
 P 6900 3800
-F 0 "R6" H 6970 3846 50  0000 L CNN
-F 1 "100k" H 6970 3755 50  0000 L CNN
+F 0 "R6" H 6650 3900 50  0000 L CNN
+F 1 "100k" H 6650 3750 50  0000 L CNN
 F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P2.54mm_Vertical" V 6830 3800 50  0001 C CNN
 F 3 "~" H 6900 3800 50  0001 C CNN
 	1    6900 3800
@@ -542,8 +520,8 @@ $Comp
 L Device:D_Schottky D3
 U 1 1 604CE110
 P 7200 3800
-F 0 "D3" V 7154 3880 50  0000 L CNN
-F 1 "D_Schottky" V 7245 3880 50  0000 L CNN
+F 0 "D3" V 7050 3850 50  0000 L CNN
+F 1 "D_Schottky" V 6950 3700 50  0000 L CNN
 F 2 "Diode_THT:D_A-405_P2.54mm_Vertical_AnodeUp" H 7200 3800 50  0001 C CNN
 F 3 "~" H 7200 3800 50  0001 C CNN
 	1    7200 3800
@@ -575,8 +553,8 @@ $Comp
 L Device:R R14
 U 1 1 604D28C6
 P 7850 3800
-F 0 "R14" H 7920 3846 50  0000 L CNN
-F 1 "100k" H 7920 3755 50  0000 L CNN
+F 0 "R14" H 7600 3850 50  0000 L CNN
+F 1 "100k" H 7600 3700 50  0000 L CNN
 F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P2.54mm_Vertical" V 7780 3800 50  0001 C CNN
 F 3 "~" H 7850 3800 50  0001 C CNN
 	1    7850 3800
@@ -586,8 +564,8 @@ $Comp
 L Device:D_Schottky D5
 U 1 1 604D2B98
 P 8150 3800
-F 0 "D5" V 8104 3880 50  0000 L CNN
-F 1 "D_Schottky" V 8195 3880 50  0000 L CNN
+F 0 "D5" V 8000 3850 50  0000 L CNN
+F 1 "D_Schottky" V 7900 3700 50  0000 L CNN
 F 2 "Diode_THT:D_A-405_P2.54mm_Vertical_AnodeUp" H 8150 3800 50  0001 C CNN
 F 3 "~" H 8150 3800 50  0001 C CNN
 	1    8150 3800
@@ -802,10 +780,6 @@ F 3 "~" H 2800 1350 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3750 1350 3600 1350
-Wire Wire Line
-	3300 1350 3200 1350
-Wire Wire Line
 	2950 1850 2950 1600
 Wire Wire Line
 	2950 1600 3200 1600
@@ -994,7 +968,78 @@ Text Notes 7400 7250 0    50   ~ 0
 Text Notes 7400 7500 0    50   ~ 0
 CABANE DE MINOU (Bas/Tour/...)
 Text Notes 8150 7650 0    50   ~ 0
-28/03/2021
+01/05/2021
 Text Notes 10600 7650 0    50   ~ 0
-A0
+B0
+Text Notes 9050 3400 1    50   ~ 0
+Temp Ext
+Text Notes 8750 3450 1    50   ~ 0
+Move Bas
+Text Notes 7900 3050 0    50   ~ 0
+Temp Bas
+Text Notes 7500 2650 0    50   ~ 0
+Capot
+Text Notes 7850 2750 0    50   ~ 0
+B LD Haut
+Text Notes 7900 2400 0    50   ~ 0
+LED
+Text Notes 7250 2200 0    50   ~ 0
+B LD Bas
+Text Notes 7500 1900 0    50   ~ 0
+Move Haut
+$Comp
+L Device:R R1
+U 1 1 608DF06D
+P 3450 750
+F 0 "R1" V 3600 650 50  0000 C CNN
+F 1 "40k" V 3600 850 50  0000 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P2.54mm_Vertical" V 3380 750 50  0001 C CNN
+F 3 "~" H 3450 750 50  0001 C CNN
+	1    3450 750 
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	3200 1350 3750 1350
+Wire Notes Line
+	3200 1100 4250 1100
+Wire Notes Line
+	4250 1100 4250 600 
+Wire Notes Line
+	4250 600  3200 600 
+Wire Notes Line
+	3200 600  3200 1100
+Text Notes 3800 1200 0    50   ~ 0
+Non monté
+Wire Notes Line
+	7350 4450 7350 4800
+Wire Notes Line
+	7350 4800 6800 4800
+Wire Notes Line
+	6800 4800 6800 4450
+Wire Notes Line
+	6800 4450 7350 4450
+Text Notes 6550 4900 0    50   ~ 0
+Non monté
+Wire Notes Line
+	6900 2800 6900 3100
+Wire Notes Line
+	6900 3100 6250 3100
+Wire Notes Line
+	6250 3100 6250 2800
+Wire Notes Line
+	6250 2800 6900 2800
+Text Notes 6300 2900 0    50   ~ 0
+Non
+Text Notes 6300 3000 0    50   ~ 0
+monté
+Wire Notes Line
+	8750 3700 8750 3900
+Wire Notes Line
+	8000 3900 8000 3700
+Text Notes 8300 3850 0    50   ~ 0
+Non monté
+Wire Notes Line
+	8000 3700 8750 3700
+Wire Notes Line
+	8000 3900 8750 3900
 $EndSCHEMATC

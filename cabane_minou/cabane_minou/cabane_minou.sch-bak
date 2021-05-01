@@ -37,7 +37,7 @@ L Device:R R2
 U 1 1 6046DFE9
 P 3950 750
 F 0 "R2" H 4020 796 50  0000 L CNN
-F 1 "R" H 4020 705 50  0000 L CNN
+F 1 "100k" H 4020 705 50  0000 L CNN
 F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P2.54mm_Vertical" V 3880 750 50  0001 C CNN
 F 3 "~" H 3950 750 50  0001 C CNN
 	1    3950 750 
@@ -65,34 +65,12 @@ F 3 "" H 3100 750 50  0001 C CNN
 	1    3100 750 
 	0    1    1    0   
 $EndComp
-$Comp
-L Device:D_Zener D1
-U 1 1 60470D30
-P 3450 750
-F 0 "D1" V 3404 830 50  0000 L CNN
-F 1 "1V" V 3495 830 50  0000 L CNN
-F 2 "Diode_THT:D_A-405_P2.54mm_Vertical_AnodeUp" H 3450 750 50  0001 C CNN
-F 3 "~" H 3450 750 50  0001 C CNN
-	1    3450 750 
-	-1   0    0    1   
-$EndComp
 Wire Wire Line
 	3800 750  3750 750 
 Wire Wire Line
 	3300 750  3100 750 
 Wire Wire Line
 	4250 750  4100 750 
-$Comp
-L Device:R R1
-U 1 1 604719A0
-P 3450 1350
-F 0 "R1" V 3243 1350 50  0000 C CNN
-F 1 "R" V 3334 1350 50  0000 C CNN
-F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P2.54mm_Vertical" V 3380 1350 50  0001 C CNN
-F 3 "~" H 3450 1350 50  0001 C CNN
-	1    3450 1350
-	0    1    1    0   
-$EndComp
 Wire Wire Line
 	3750 1350 3750 750 
 Connection ~ 3750 750 
@@ -802,10 +780,6 @@ F 3 "~" H 2800 1350 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3750 1350 3600 1350
-Wire Wire Line
-	3300 1350 3200 1350
-Wire Wire Line
 	2950 1850 2950 1600
 Wire Wire Line
 	2950 1600 3200 1600
@@ -987,4 +961,43 @@ Wire Wire Line
 Connection ~ 2950 3450
 Wire Wire Line
 	2950 3450 2950 3500
+Text Notes 7300 7250 0    50   ~ 0
+1
+Text Notes 7400 7250 0    50   ~ 0
+1
+Text Notes 7400 7500 0    50   ~ 0
+CABANE DE MINOU (Bas/Tour/...)
+Text Notes 8150 7650 0    50   ~ 0
+01/05/2021
+Text Notes 10600 7650 0    50   ~ 0
+B0
+Text Notes 9050 3400 1    50   ~ 0
+Temp Ext
+Text Notes 8750 3450 1    50   ~ 0
+Move Bas
+Text Notes 7900 3050 0    50   ~ 0
+Temp Bas
+Text Notes 7500 2650 0    50   ~ 0
+Capot
+Text Notes 7850 2750 0    50   ~ 0
+B LD Haut
+Text Notes 7900 2400 0    50   ~ 0
+LED
+Text Notes 7250 2200 0    50   ~ 0
+B LD Bas
+Text Notes 7500 1900 0    50   ~ 0
+Move Haut
+$Comp
+L Device:R R1
+U 1 1 608DF06D
+P 3450 750
+F 0 "R1" V 3243 750 50  0000 C CNN
+F 1 "40k" V 3334 750 50  0000 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P2.54mm_Vertical" V 3380 750 50  0001 C CNN
+F 3 "~" H 3450 750 50  0001 C CNN
+	1    3450 750 
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	3200 1350 3750 1350
 $EndSCHEMATC
