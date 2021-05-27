@@ -212,7 +212,6 @@ void handleClearAll()
     server.send(400, "text/plain", "ERROR BAD PARAMETER");    
   }
   FastLED.show();
-    
 }
 
 /**
@@ -220,8 +219,8 @@ void handleClearAll()
 */
 void handleSetLeds()
 {
-  if (wdg.isRunning()==true)
-    wdg.start();
+  //if (wdg.isRunning()==true)
+  wdg.start();
 
   String lds=server.pathArg(0);
   if (lds=="haut")
@@ -574,7 +573,6 @@ void loop_app()
   g_flgCapot=(digitalRead(PIN_CAPOT)==HIGH)?true:false;
 
   g_darkness=analogRead(PIN_DARK);
-  Serial.println(g_darkness);
 
   if (wdg.isRunning()==false)
   {

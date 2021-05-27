@@ -19,7 +19,7 @@ unsigned long Timer::getRemaining_ms(void)
     else
       delta_ms=0xFFFFFFFF-tick0_ms+t;
 
-    if (delta_ms>=duration_ms)
+    if ( (delta_ms>=duration_ms) || (running==false) )
       return 0;
     else
       return duration_ms-delta_ms;
