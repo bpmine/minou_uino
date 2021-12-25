@@ -8,7 +8,11 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
-#include <ArduinoOTA.h>
+
+#define ENABLE_OTA
+#ifdef ENABLE_OTA
+  #include <ArduinoOTA.h>
+#endif
 
 #include "DHTesp.h"
 #include <uri/UriBraces.h>
@@ -77,13 +81,14 @@ int g_darkness=0;
 
 Move mvHaut=Move();
 Move mvBas=Move();
+Move mvCapot=Move();
 
 #define SIZE_PROG (500)
 char prog_haut[SIZE_PROG] = "S26E33LrOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LgOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LbOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOW*";
 char prog_bas[SIZE_PROG] = "S26E33LrOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LgOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LbOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOW*";
 
-LdServer ldsrv_bas=LdServer(&server,leds_bas,NUM_LEDS,prog_bas,"bas");
-LdServer ldsrv_haut=LdServer(&server,leds_haut,NUM_LEDS,prog_haut,"haut");
+LdServer ldsrv_bas=LdServer(&server,leds_bas,NUM_LEDS,prog_bas,SIZE_PROG,"bas");
+LdServer ldsrv_haut=LdServer(&server,leds_haut,NUM_LEDS,prog_haut,SIZE_PROG,"haut");
 
 /**
  * @brief Allume toutes les LEDs avec la couleur fournie
@@ -199,12 +204,12 @@ void handleClearAll()
   String lds=server.pathArg(0);
   if (lds=="haut")
   {
-    ldsrv_haut.handleClearAll();
+    ldsrv_haut.handlerClearAll();
     server.send(200, "text/plain", "OK");
   }
   if (lds=="bas")
   {
-    ldsrv_bas.handleClearAll();
+    ldsrv_bas.handlerClearAll();
     server.send(200, "text/plain", "OK");
   }
   else
@@ -219,8 +224,8 @@ void handleClearAll()
 */
 void handleSetLeds()
 {
-  //if (wdg.isRunning()==true)
-  wdg.start();
+  if (wdg.isRunning()==true)
+    wdg.start();
 
   String lds=server.pathArg(0);
   if (lds=="haut")
@@ -247,17 +252,17 @@ void handleSetLeds()
 void handleInfo()
 {      
   String s="[{";
-  s+="'name':'haut',";
-  s+="'description':'Gestion des LEDs du haut de la cabane du minou'";
-  s+="'num_leds':'";
+  s+="\"name\":\"haut\",";
+  s+="\"description\":\"Gestion des LEDs du haut de la cabane du minou\"";
+  s+="\"num_leds\":\"";
   s+=NUM_LEDS;
-  s+="'";
+  s+="\"";
   s+="}";
-  s+="',{name':'bas',";
-  s+="'description':'Gestion des LEDs du bas de la cabane du minou'";
-  s+="'num_leds':'";
+  s+="\",{name\":\"bas\",";
+  s+="\"description\":\"Gestion des LEDs du bas de la cabane du minou\"";
+  s+="\"num_leds\":\"";
   s+=NUM_LEDS;
-  s+="'";
+  s+="\"";
   s+="}]";
   
   server.send(200, "text/plain", s);
@@ -266,22 +271,24 @@ void handleInfo()
 void handleSensors(void)
 {
   String s="{";
-  s+="'temp_out':";
+  s+="\"temp_out\":";
   s+=g_in_tempOut;
-  s+=",'temp_bas':";
+  s+=",\"temp_bas\":";
   s+=g_in_tempBas;
-  s+=",'hum_out':";
+  s+=",\"hum_out\":";
   s+=g_in_humOut;
-  s+=",'hum_bas':";
+  s+=",\"hum_bas\":";
   s+=g_in_humBas;
-  s+=",'capot':";
+  s+=",\"capot\":";
   s+=g_flgCapot;
-  s+=",'darkness':";
+  s+=",\"darkness\":";
   s+=g_darkness;
-  s+=",'move_haut':";
+  s+=",\"move_haut\":";
   s+=mvHaut.getCount();
-  s+=",'move_bas':";
+  s+=",\"move_bas\":";
   s+=mvBas.getCount();
+  s+=",\"move_capot\":";
+  s+=mvCapot.getCount();
   s+="}";  
   
   server.send(200, "text/plain", s);  
@@ -296,45 +303,26 @@ void handleSensors(void)
  * - /leds/anim?enable=1 => Active l'animation. Retourne ANIM ENABLED ou ANIM DISABLED
  * - /leds/anim?info => Retourne la configuration de l'animation
 */
-/*void handleAnim()
+void handleAnim()
 {
-  if (server.args()==1)
+  if (wdg.isRunning()==true)
+    wdg.start();
+
+  String lds=server.pathArg(0);
+  if (lds=="haut")
   {
-    if (strcmp(server.argName(0).c_str(),"prog")==0)
-    {
-      strncpy(prog,server.arg(0).c_str(),SIZE_PROG);
-      prog[SIZE_PROG-1]=0;
-      
-      server.send(200, "text/plain", prog);
-      return;
-    }
-    else if (strcmp(server.argName(0).c_str(),"enable")==0)
-    {
-      if (strcmp(server.arg(0).c_str(),"1")==0)
-      {
-        flg_runProg=true;
-        anim.init(prog, strlen(prog));
-        
-        server.send(200, "text/plain", "ANIM ENABLED");
-        return;
-      }
-      else
-      {
-        flg_runProg=false;
-        server.send(200, "text/plain", "ANIM DISABLED");
-        return;
-      }
-    }
-    else if (strcmp(server.argName(0).c_str(),"info")==0)
-    {
-      char str[100];
-      anim.getDumpStr(str,100);
-      server.send(200, "text/plain", str);   
-      return;  
-    }
-  }
-  server.send(400, "text/plain", "ERROR");     
-}*/
+    ldsrv_haut.handlerAnim();
+  }  
+  if (lds=="bas")
+  {
+    ldsrv_bas.handlerAnim();
+  }  
+  else
+  {
+    server.send(400, "text/plain", "ERROR UNKNOWN LED SET");
+    return;
+  }    
+}
 
 /**
  * @brief Controleur WS en cas d'erreur
@@ -363,7 +351,6 @@ void latch_value(byte *i_pOutVal,byte i_iNewValue)
     (*i_pOutVal)=i_iNewValue;
   }
 }
-
 
 
 /**
@@ -431,7 +418,7 @@ void setup(void)
   ldsrv_bas.init();
 
   server.on(UriBraces("/leds/{}/clearall"), handleClearAll);
-  //server.on(UriBraces("/leds/{}/anim"), handleAnim); 
+  server.on(UriBraces("/leds/{}/anim"), handleAnim); 
   server.on(UriBraces("/leds/{}/set"), handleSetLeds);
   
   server.on("/leds/info", handleInfo);
@@ -447,36 +434,35 @@ void setup(void)
 
   wdg.stop();
 
-  //ArduinoOTA.setHostname("CabaneMinou");
-  ArduinoOTA.setHostname(OTA_NAME);
-
-  // No authentication by default
-  ArduinoOTA.setPassword((const char *)"123");
-
-  ArduinoOTA.onStart([]() {
-    Serial.println("Start");
-  });
-  ArduinoOTA.onEnd([]() {
-    Serial.println("\nEnd");
-  });
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-  });
-  ArduinoOTA.onError([](ota_error_t error) {
-    Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR) Serial.println("End Failed");
-  });
-  ArduinoOTA.begin();
+  #ifdef ENABLE_OTA
+    ArduinoOTA.setHostname(OTA_NAME);
+    ArduinoOTA.setPassword((const char *)"123");
+  
+    ArduinoOTA.onStart([]() {
+      Serial.println("Start");
+    });
+    ArduinoOTA.onEnd([]() {
+      Serial.println("\nEnd");
+    });
+    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    });
+    ArduinoOTA.onError([](ota_error_t error) {
+      Serial.printf("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+      else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    });
+    ArduinoOTA.begin();
+  #endif
 }
 
 /**
  * @loop Boucle principale de l'arduino
 */
-void test_loop(void) 
+/*void test_loop(void) 
 {
   static int cnt=200;
   static int tst_etat=0;
@@ -552,7 +538,7 @@ void test_loop(void)
       tst_etat=0;
     }    
   }
-}
+}*/
 
 void wdgSwitchAllOff()
 {  
@@ -574,7 +560,7 @@ void loop_app()
 
   g_darkness=analogRead(PIN_DARK);
 
-  if (wdg.isRunning()==false)
+  //if (wdg.isRunning()==false)
   {
     if (mvHaut.tick()==true)
     {
@@ -601,12 +587,9 @@ void loop_app()
   server.handleClient();
   MDNS.update();
 
-  /*if (flg_runProg==true)
-  {
-    anim.tick();
-    delay(20);
-  }*/
-
+  ldsrv_bas.tick();
+  ldsrv_haut.tick();
+  
   if (wdg.tick()==true)
   {
     wdgSwitchAllOff();    
@@ -614,8 +597,11 @@ void loop_app()
 
   FastLED.show();
 
-  ArduinoOTA.handle();
+  #ifdef ENABLE_OTA
+    ArduinoOTA.handle();
+  #endif  
 
+  /// Temoin LED blanche du bas allumée quand capot ouvert
   if ( g_flgCapot==true )
   {
     digitalWrite(PIN_LED_BAS,HIGH);

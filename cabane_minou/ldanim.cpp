@@ -47,13 +47,9 @@
 
 /**
 * @brief Constructeur
-* @param leds Tableau avec les LEDs (CRGB *)
-* @param nbLeds Nombre de LEDs
 */
-LdAnim::LdAnim(void* leds, int nbLeds)
+LdAnim::LdAnim()
 {
-    m_leds = leds;
-    m_nbLeds = nbLeds;
     m_pProg = NULL;
     m_pPos = NULL;
     m_instr = 0;
@@ -65,6 +61,19 @@ LdAnim::LdAnim(void* leds, int nbLeds)
     m_iProgLen = 0;
     m_start = 0;
     m_end = 0;
+    m_leds=NULL;
+    m_nbLeds=0;
+}
+
+/**
+* @brief Configure LEDs
+* @param leds Tableau avec les LEDs (CRGB *)
+* @param nbLeds Nombre de LEDs
+*/
+void LdAnim::setLeds(void* leds, int nbLeds)
+{
+    m_leds = leds;
+    m_nbLeds = nbLeds;
 }
 
 /**

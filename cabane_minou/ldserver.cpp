@@ -28,7 +28,7 @@ void LdServer::clearAll(void)
  *       - b: Bleu
  *       - w: Blanc
  *       - r: Rouge
- *       - 0: Etaint (zero)
+ *       - 0: Eteint (zero)
  *       - y: Jaune
  *       - o: Orange
  *       - p: Rose
@@ -178,9 +178,59 @@ void LdServer::handlerSetLeds(void)
 }
 
 /**
+ * @brief Controlleur WS pour gerer les programmes MACRO d'animation des LEDs
+ * 
+ * On envoi une chaine contenant le programme MACRO
+ * 
+ * - /leds/anim?prog="S26E33LrOS1E23..." => Modifie le programme en cours. Retourne un echo du programme si reussite.
+ * - /leds/anim?enable=1 => Active l'animation. Retourne ANIM ENABLED ou ANIM DISABLED
+ * - /leds/anim?info => Retourne la configuration de l'animation
+*/
+void LdServer::handlerAnim(void)
+{
+  if (m_pServer->args()==1)
+  {
+    if (strcmp(m_pServer->argName(0).c_str(),"prog")==0)
+    {
+      strncpy(m_pProg,m_pServer->arg(0).c_str(),m_maxSizeProg);
+      m_pProg[m_maxSizeProg-1]=0;
+      
+      m_pServer->send(200, "text/plain", m_pProg);
+      return;
+    }
+    else if (strcmp(m_pServer->argName(0).c_str(),"enable")==0)
+    {
+      if (strcmp(m_pServer->arg(0).c_str(),"1")==0)
+      {
+        flg_runProg=true;
+        m_anim.init(m_pProg, m_maxSizeProg);
+        
+        m_pServer->send(200, "text/plain", "ANIM ENABLED");
+        return;
+      }
+      else
+      {
+        flg_runProg=false;
+        m_pServer->send(200, "text/plain", "ANIM DISABLED");
+        return;
+      }
+    }
+    else if (strcmp(m_pServer->argName(0).c_str(),"info")==0)
+    {
+      char str[100];
+      m_anim.getDumpStr(str,100);
+      m_pServer->send(200, "text/plain", str);   
+      return;  
+    }
+  }
+  
+  m_pServer->send(400, "text/plain", "ERROR");  
+}
+
+/**
  * @brief Controlleur WS eteint toutes les LEDs /leds/clearall
 */
-void LdServer::handleClearAll()
+void LdServer::handlerClearAll()
 {  
   clearAll();
 
@@ -190,7 +240,13 @@ void LdServer::handleClearAll()
     
 }
 
-LdServer::LdServer(ESP8266WebServer *pServer,CRGB *pLeds,int numLeds,char *pProg,char *strName)
+void LdServer::stopAnim(void)
+{
+  flg_runProg=false;
+  clearAll();
+}
+
+LdServer::LdServer(ESP8266WebServer *pServer,CRGB *pLeds,int numLeds,char *pProg,int maxSizeProg,char *strName)
 {
   m_pServer=pServer;
   m_pLeds=pLeds;
@@ -198,6 +254,17 @@ LdServer::LdServer(ESP8266WebServer *pServer,CRGB *pLeds,int numLeds,char *pProg
   strncpy(m_strName,strName,SIZE_LDSERVER_NAME);
   m_strName[SIZE_LDSERVER_NAME-1]=0;
   m_numLeds=numLeds;
+  m_anim.setLeds(pLeds,numLeds);
+  flg_runProg=false;
+  m_maxSizeProg=maxSizeProg;
+}
+
+void LdServer::tick(void)
+{
+  if (flg_runProg==true)
+  {
+    m_anim.tick();
+  }
 }
 
 void LdServer::init(void)

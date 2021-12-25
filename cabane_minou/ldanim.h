@@ -1,3 +1,5 @@
+#ifndef LDANIM_HEADER_INCLUDED
+#define LDANIM_HEADER_INCLUDED
 
 /**
  * @file ldanim.h
@@ -36,10 +38,13 @@ private:
     void logStep();
 
 public:
-    LdAnim(void* leds, int nbLeds);
+    LdAnim();
+    void setLeds(void* leds, int nbLeds);
 
     void init(char* prog, int len);
     void tick(void);
 
     void getDumpStr(char* strOut, int maxLen);
 };
+
+#endif
