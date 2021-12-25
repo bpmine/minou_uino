@@ -253,13 +253,13 @@ void handleInfo()
 {      
   String s="[{";
   s+="\"name\":\"haut\",";
-  s+="\"description\":\"Gestion des LEDs du haut de la cabane du minou\"";
+  s+="\"description\":\"Gestion des LEDs du haut de la cabane du minou\",";
   s+="\"num_leds\":\"";
   s+=NUM_LEDS;
   s+="\"";
-  s+="}";
-  s+="\",{name\":\"bas\",";
-  s+="\"description\":\"Gestion des LEDs du bas de la cabane du minou\"";
+  s+="},";
+  s+=",{\"name\":\"bas\",";
+  s+="\"description\":\"Gestion des LEDs du bas de la cabane du minou\",";
   s+="\"num_leds\":\"";
   s+=NUM_LEDS;
   s+="\"";
