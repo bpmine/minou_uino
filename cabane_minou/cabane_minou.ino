@@ -9,12 +9,12 @@
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 
-#define ENABLE_OTA
+//#define ENABLE_OTA
 #ifdef ENABLE_OTA
   #include <ArduinoOTA.h>
 #endif
 
-#include "DHTesp.h"
+#include <DHTesp.h>
 #include <uri/UriBraces.h>
 #include "ldserver.h"
 
@@ -52,6 +52,9 @@ ESP8266WebServer server(80);
 Timer wdg=Timer(3600*1000U);
 Timer mvtmr=Timer(30000U);
 
+Timer tmrTempOut=Timer(40*1000U);
+Timer tmrTempBas=Timer(40*1000U);
+
 
 /**
  * @brief Configuration des bandeau de LEDs
@@ -71,13 +74,12 @@ CRGB leds_haut[NUM_LEDS];
 
 DHTesp dht_bas;
 DHTesp dht_out;
-byte g_in_humBas=0;
-byte g_in_tempBas=0;
-byte g_in_humOut=0;
-byte g_in_tempOut=0;
+int g_in_humBas=0;
+int g_in_tempBas=0;
+int g_in_humOut=0;
+int g_in_tempOut=0;
 bool g_flgCapot=false;
 
-int g_darkness=0;
 
 Move mvHaut=Move();
 Move mvBas=Move();
@@ -258,7 +260,7 @@ void handleInfo()
   s+=NUM_LEDS;
   s+="\"";
   s+="},";
-  s+=",{\"name\":\"bas\",";
+  s+="{\"name\":\"bas\",";
   s+="\"description\":\"Gestion des LEDs du bas de la cabane du minou\",";
   s+="\"num_leds\":\"";
   s+=NUM_LEDS;
@@ -272,17 +274,15 @@ void handleSensors(void)
 {
   String s="{";
   s+="\"temp_out\":";
-  s+=g_in_tempOut;
+  s+=String(g_in_tempOut);
   s+=",\"temp_bas\":";
-  s+=g_in_tempBas;
+  s+=String(g_in_tempBas);
   s+=",\"hum_out\":";
-  s+=g_in_humOut;
+  s+=String(g_in_humOut);
   s+=",\"hum_bas\":";
-  s+=g_in_humBas;
+  s+=String(g_in_humBas);
   s+=",\"capot\":";
   s+=g_flgCapot;
-  s+=",\"darkness\":";
-  s+=g_darkness;
   s+=",\"move_haut\":";
   s+=mvHaut.getCount();
   s+=",\"move_bas\":";
@@ -343,15 +343,29 @@ void handleNotFound()
   server.send(404, "text/plain", message);
 }
 
-void latch_value(byte *i_pOutVal,byte i_iNewValue)
+void measureTempHum(DHTesp &dht,int *temp_dg,int *hum_pc,Timer *tmr)
 {
-  byte old=(*i_pOutVal);
-  if ( (old!=i_iNewValue) && ( ((i_iNewValue!=0) && (i_iNewValue!=255) ) || (abs(i_iNewValue-old)<2) ) )
+  bool flgFound=false;
+  for (int i=4;i>0;i--)
   {
-    (*i_pOutVal)=i_iNewValue;
+    TempAndHumidity newValues = dht.getTempAndHumidity();
+  
+    if (dht.getStatus()==DHTesp::ERROR_NONE)
+    {
+      *temp_dg=newValues.temperature;
+      *hum_pc=newValues.humidity;  
+      tmr->start();
+    }
+
+    delay(20);
+  }
+
+  if (tmr->tick()==true)
+  {
+    *temp_dg=-255;
+    *hum_pc=-255;
   }
 }
-
 
 /**
  * @brief Setup d'initialisation de l'arduino
@@ -377,6 +391,7 @@ void setup(void)
   pinMode(PIN_DHT11_OUT, INPUT);
   
   pinMode(PIN_CAPOT, INPUT);
+  mvCapot.begin(PIN_CAPOT);
 
   dht_bas.setup(PIN_DHT11_BAS, DHTesp::DHT11);
   dht_out.setup(PIN_DHT11_OUT, DHTesp::DHT11);
@@ -415,6 +430,7 @@ void setup(void)
     Serial.println("MDNS responder started");
   }
 
+  ldsrv_haut.init();
   ldsrv_bas.init();
 
   server.on(UriBraces("/leds/{}/clearall"), handleClearAll);
@@ -462,21 +478,13 @@ void setup(void)
 /**
  * @loop Boucle principale de l'arduino
 */
-/*void test_loop(void) 
+void test_loop(void) 
 {
   static int cnt=200;
   static int tst_etat=0;
 
-  TempAndHumidity newValues = dht_bas.getTempAndHumidity();
-  latch_value(&g_in_humBas,(byte)newValues.humidity);
-  latch_value(&g_in_tempBas,(byte)newValues.temperature);
-  
-  newValues = dht_out.getTempAndHumidity();
-  latch_value(&g_in_humOut,(byte)newValues.humidity);
-  latch_value(&g_in_tempOut,(byte)newValues.temperature);
-
-  g_darkness=analogRead(PIN_DARK);
-  Serial.println(g_darkness);
+  measureTempHum(dht_bas,&g_in_tempBas,&g_in_humBas,&tmrTempBas);
+  measureTempHum(dht_out,&g_in_tempOut,&g_in_humOut,&tmrTempOut);
 
   delay(10);
   
@@ -497,6 +505,11 @@ void setup(void)
   if (mvBas.tick()==true)
   {
     Serial.println("Move Bas");
+  }
+
+  if (mvCapot.tick()==true)
+  {
+    Serial.println("Manipulation capot");
   }
 
   FastLED.show();
@@ -520,9 +533,6 @@ void setup(void)
       Serial.println(g_in_humOut);
       Serial.print("Tmp out:");
       Serial.println(g_in_tempOut);
-
-      Serial.print("Dark:");
-      Serial.println(g_darkness);
       
       Serial.print("Move Bas:");
       Serial.println(mvBas.getCount());
@@ -538,7 +548,12 @@ void setup(void)
       tst_etat=0;
     }    
   }
-}*/
+
+  #ifdef ENABLE_OTA
+    ArduinoOTA.handle();
+  #endif  
+
+}
 
 void wdgSwitchAllOff()
 {  
@@ -548,17 +563,10 @@ void wdgSwitchAllOff()
 
 void loop_app()
 {
-  TempAndHumidity newValues = dht_bas.getTempAndHumidity();
-  latch_value(&g_in_humBas,(byte)newValues.humidity);
-  latch_value(&g_in_tempBas,(byte)newValues.temperature);
-  
-  newValues = dht_out.getTempAndHumidity();
-  latch_value(&g_in_humOut,(byte)newValues.humidity);
-  latch_value(&g_in_tempOut,(byte)newValues.temperature);
+  measureTempHum(dht_bas,&g_in_tempBas,&g_in_humBas,&tmrTempBas);
+  measureTempHum(dht_out,&g_in_tempOut,&g_in_humOut,&tmrTempOut);
 
   g_flgCapot=(digitalRead(PIN_CAPOT)==HIGH)?true:false;
-
-  g_darkness=analogRead(PIN_DARK);
 
   //if (wdg.isRunning()==false)
   {
@@ -574,6 +582,11 @@ void loop_app()
       mvtmr.start();
       setAll(leds_haut,CRGB::Red);
       Serial.println("Move Bas");
+    }
+
+    if (mvCapot.tick()==true)
+    {
+      Serial.println("Manipulation capot");
     }
   }    
 

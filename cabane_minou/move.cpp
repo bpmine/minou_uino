@@ -1,8 +1,9 @@
 #include "move.h"
 #include <arduino.h>
 
-Move::Move()
+Move::Move(bool falling)
 {
+  m_falling=falling;
   m_pin=-1;
   m_cnt=0;
   m_last_state=false;
@@ -20,7 +21,11 @@ bool Move::tick(void)
   if (m_pin==-1)
     return false;
     
-  bool st=digitalRead(m_pin)==HIGH?true:false;
+  bool st;
+  if (m_falling==false)
+    st=digitalRead(m_pin)==HIGH?true:false;
+  else  
+    st=digitalRead(m_pin)==HIGH?false:true;
 
   if ((st==true) && (m_last_state==false) )
   {

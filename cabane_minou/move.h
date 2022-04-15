@@ -5,9 +5,10 @@ class Move
     long m_cnt;  
     
     bool m_last_state;
+    bool m_falling;
   
   public:
-    Move();
+    Move(bool falling=false);
   
     void begin(int pin);
 
