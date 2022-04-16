@@ -14,8 +14,18 @@ def read_sensors(ip):
     return None
 
 sens=read_sensors(IP_CABANE)
-print('Temperature ext: %s°C' % (sens['temp_out']) )
-print('Temperature bas: %s°C' % (sens['temp_bas']) )
+print('_'*60)
+print('HAUT:')
+print('  Temperature ext : %s°C' % (sens['temp_out']) )
+print('  Humidité ext    : %s%%' % (sens['hum_out']) )
+print('  Move haut       : %s' % (sens['move_haut']) )
+print('_'*60)
+print('BAS:')
+print('  Temperature bas : %s°C' % (sens['temp_bas']) )
+print('  Humidité bas    : %s%%' % (sens['hum_bas']) )
+print('  Move bas        : %s' % (sens['move_bas']) )
+print('  Move capot      : %s' % (sens['move_capot']) )
+print('_'*60)
 
 
     
