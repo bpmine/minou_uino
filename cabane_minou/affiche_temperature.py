@@ -40,7 +40,7 @@ class EstLa:
             self.last_ctr=ctr
             return
 
-        if (ctr>self.last_ctr):
+        if (ctr>self.last_ctr+2):
             self.la=True
         else:
             self.la=False
@@ -58,8 +58,7 @@ class EstLa:
 
 def NotiticationSiMinouLa():
     enHaut=EstLa()
-    enBas=EstLa()
-    toast = ToastNotifier()
+    enBas=EstLa()    
 
     while (True):
         sens=read_sensors(IP_CABANE)
@@ -75,13 +74,19 @@ def NotiticationSiMinouLa():
             print('**** MINOU EST EN HAUT ****')
 
         if (chBas==True) or (chHaut==True):
+            print("QQche a changé...")
             msg=None            
-            if enBas.la==True:
+            if (chBas==True) and (enBas.la==True):
                 msg="MINOU VIENT D'APPARAITRE EN BAS"
-            elif enHaut.la==True:
+            elif (chBas==True) and (enBas.la==False):
+                msg="MINOU VIENT DE QUITTER LE BAS"
+            elif (chHaut==True) and (enHaut.la==True):
                 msg="MINOU VIENT D'APPARAITRE EN HAUT"
+            elif (chHaut==True) and (enHaut.la==False):
+                msg="MINOU VIENT DE QUITTER LE HAUT"            
 
             if msg!=None:
+                toast = ToastNotifier()
                 toast.show_toast(
                     "CABANE MINOU",
                     msg,
@@ -90,7 +95,7 @@ def NotiticationSiMinouLa():
                     threaded = True,
                  )
 
-        time.sleep(15)
+        time.sleep(20)
     
     
 
