@@ -245,6 +245,19 @@ void handleSetLeds()
   }
 }
 
+void addJsonVarInt(char *strBuffer,char *strName,int iVal)
+{
+  char tmp[100];
+  sprintf(tmp,"\"%s\":%d",strName,iVal);
+  strcat(strBuffer,tmp);
+}
+
+void addJsonVarStr(char *strBuffer,char *strName,char *strVal)
+{
+  char tmp[100];
+  sprintf(tmp,"\"%s\":\"%s\"",strName,strVal);
+  strcat(strBuffer,tmp);
+}
 
 /**
  * @brief Controlleur WS informations
@@ -253,45 +266,46 @@ void handleSetLeds()
 */
 void handleInfo()
 {      
-  String s="[{";
-  s+="\"name\":\"haut\",";
-  s+="\"description\":\"Gestion des LEDs du haut de la cabane du minou\",";
-  s+="\"num_leds\":\"";
-  s+=NUM_LEDS;
-  s+="\"";
-  s+="},";
-  s+="{\"name\":\"bas\",";
-  s+="\"description\":\"Gestion des LEDs du bas de la cabane du minou\",";
-  s+="\"num_leds\":\"";
-  s+=NUM_LEDS;
-  s+="\"";
-  s+="}]";
+  char strJson[500];
+  strcpy(strJson,"[{");
+  addJsonVarStr(strJson,"name","haut");
+  addJsonVarStr(strJson,"description","Gestion des LEDs du haut de la cabane du minou");
+  addJsonVarInt(strJson,"num_leds",NUM_LEDS);
+  strcat(strJson,"},{");
+  addJsonVarStr(strJson,"name","bas");
+  addJsonVarStr(strJson,"description","Gestion des LEDs du bas de la cabane du minou");
+  addJsonVarInt(strJson,"num_leds",NUM_LEDS);
+  strcat(strJson,"}]");
   
-  server.send(200, "text/plain", s);
+  server.send(200, "text/plain", strJson);
 }
+
+
 
 void handleSensors(void)
 {
-  String s="{";
-  s+="\"temp_out\":";
-  s+=String(g_in_tempOut);
-  s+=",\"temp_bas\":";
-  s+=String(g_in_tempBas);
-  s+=",\"hum_out\":";
-  s+=String(g_in_humOut);
-  s+=",\"hum_bas\":";
-  s+=String(g_in_humBas);
-  s+=",\"capot\":";
-  s+=g_flgCapot;
-  s+=",\"move_haut\":";
-  s+=mvHaut.getCount();
-  s+=",\"move_bas\":";
-  s+=mvBas.getCount();
-  s+=",\"move_capot\":";
-  s+=mvCapot.getCount();
-  s+="}";  
+  char strJson[500]="";
+
+  strcpy(strJson,"");
+  strcat(strJson,"{");
+  addJsonVarInt(strJson,"temp_out",g_in_tempOut);
+  strcat(strJson,",");
+  addJsonVarInt(strJson,"temp_bas",g_in_tempBas);
+  strcat(strJson,",");
+  addJsonVarInt(strJson,"hum_out",g_in_humOut);
+  strcat(strJson,",");
+  addJsonVarInt(strJson,"hum_bas",g_in_humBas);
+  strcat(strJson,",");
+  addJsonVarInt(strJson,"capot",g_flgCapot);
+  strcat(strJson,",");
+  addJsonVarInt(strJson,"move_haut",mvHaut.getCount());
+  strcat(strJson,",");
+  addJsonVarInt(strJson,"move_bas",mvBas.getCount());
+  strcat(strJson,",");
+  addJsonVarInt(strJson,"move_capot",mvCapot.getCount());
+  strcat(strJson,"}");
   
-  server.send(200, "text/plain", s);  
+  server.send(200, "text/plain", strJson);  
 }
 
 /**
