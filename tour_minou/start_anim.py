@@ -1,7 +1,7 @@
 import requests
 
-IP_TOUR='192.168.1.42'
-IP_CABANE='192.168.1.44'
+IP_TOUR='192.168.2.130'
+IP_CABANE='192.168.2.155'
 
 
 def test_tour():
@@ -84,11 +84,22 @@ def disable_wdg():
 def clear_all():
     resp=requests.get('http://%s/leds/clearall' % IP_TOUR)
     print(resp.text)
+    resp=requests.get('http://%s/leds/clearall' % IP_CABANE)
+    print(resp.text)
+
+
+def read_cabane():
+    resp=requests.get('http://%s/sensors' % IP_CABANE)
+    print(resp.text)
+    
 
 
 clear_all() 
 
-#init_tour()  
-#init_cabane()
+init_tour()  
+init_cabane()
 
+#read_cabane()
 #disable_wdg()
+
+
