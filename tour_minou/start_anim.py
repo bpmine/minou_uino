@@ -84,6 +84,14 @@ def disable_wdg():
 def clear_all():
     resp=requests.get('http://%s/leds/clearall' % IP_TOUR)
     print(resp.text)
+    resp=requests.get('http://%s/leds/clearall' % IP_CABANE)
+    print(resp.text)
+
+
+def read_cabane():
+    resp=requests.get('http://%s/sensors' % IP_CABANE)
+    print(resp.text)
+    
 
 
 clear_all() 
@@ -91,4 +99,7 @@ clear_all()
 #init_tour()  
 #init_cabane()
 
+#read_cabane()
 #disable_wdg()
+
+
