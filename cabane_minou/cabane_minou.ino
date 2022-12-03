@@ -9,6 +9,7 @@
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <EEPROM.h>
+#include <ArduinoJson.h>
 
 #define ENABLE_MQTT
 //#define ENABLE_OTA
@@ -87,6 +88,7 @@ Timer mvtmr=Timer(30000U);
 Timer tmrTempOut=Timer(40*1000U);
 Timer tmrTempBas=Timer(40*1000U);
 
+StaticJsonDocument<256> doc;
 
 /**
  * @brief Configuration des bandeau de LEDs
@@ -220,6 +222,34 @@ void setup_mqtt(void)
 void onReceiveCmd(const String &payload)
 {
   Serial.println(payload);
+  
+  deserializeJson(doc, payload);
+
+  auto error = deserializeJson(doc, payload);
+  if (error) 
+  {
+    Serial.print(F("deserializeJson() failed with code "));
+    Serial.println(error.c_str());
+    return;
+  }
+
+  if (doc["cmd"]=="clearall")
+  {
+    clearAll(leds_haut);
+    clearAll(leds_bas);
+  }
+  else if (doc["cmd"]=="clrbas")
+  {
+    clearAll(leds_bas);    
+  }
+  else if (doc["cmd"]=="clrhaut")
+  {
+    clearAll(leds_haut);
+  }
+  else if (doc["cmd"]=="setbas")
+  {
+    //clearAll(leds_haut);
+  }
 }
 
 void onConnectionEstablished()
