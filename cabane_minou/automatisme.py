@@ -1,15 +1,18 @@
 #!/usr/bin/python3
 import os
-from datetime import datetime
+from datetime import datetime,timezone
+from dateutil import tz
 import time
+from sys import argv
 import requests
+import re
 
 IP_CABANE='192.168.2.155'
 IP_TOUR='192.168.2.130'
 
 LOG_PATH='/var/log/domgw'
 LOG_FILENAME='automatisme.log'
-LOG_ENABLED=False
+LOG_ENABLED=True
 
 class ArdLeds:
     GREEN='g'
@@ -103,7 +106,7 @@ def log(msg):
     print('%s> %s\n' % (sDte,msg))
     
     if LOG_ENABLED==True:        
-        with open(os.path.sep.join([LOG_PATH,LOG_FILENAME]),'w') as fp:                        
+        with open(os.path.sep.join([LOG_PATH,LOG_FILENAME]),'a+') as fp:                        
             fp.write('%s> %s\n' % (sDte,msg))
             fp.close()  
 
@@ -157,7 +160,7 @@ def tick_minute(hour,minute):
         ledsCabaneHaut.disableAnim()
         ledsCabaneBas.setAll('b')        
         if (minute % 2) == 0:
-            ledsCabaneHaut.setAll('b')
+            ledsCabaneHaut.setAll('g')
         else:
             ledsCabaneHaut.setAll('r')
     elif (hour==7) and (minute>30) and (minute<45):
@@ -171,6 +174,7 @@ def tick_minute(hour,minute):
             ledsCabaneHaut.setAll('r')
     elif (hour==7) and (minute==45):
         ledsCabaneBas.disableAnim()
+        ledsCabaneBas.setAll('g')
         ledsCabaneHaut.setAnim(PROG_1_CABANE)
         ledsTour.setAnim(PROG_INITIAL_TOUR)
     elif (hour==8) and (minute==0):
@@ -213,12 +217,12 @@ def tick_minute(hour,minute):
         ledsTour.setAnim(PROG_INITIAL_TOUR)
     elif (hour==20) and (minute==0):
         ledsCabaneBas.disableAnim()
-        ledsCabaneBas.setAll('b')
+        ledsCabaneBas.setAll('r')
         ledsCabaneHaut.setAnim(PROG_1_CABANE)
         ledsTour.setAnim(PROG_INITIAL_TOUR)
     elif (hour==21) and (minute==0):
         ledsCabaneBas.disableAnim()
-        ledsCabaneBas.setAll('b')
+        ledsCabaneBas.setAll('r')
         ledsCabaneHaut.setAnim(PROG_1_CABANE)
         ledsTour.setAnim(PROG_INITIAL_TOUR)
     elif (hour==22) and (minute==0):
@@ -260,8 +264,22 @@ if LOG_ENABLED==True:
     if not os.path.exists(LOG_PATH):
         os.mkdir(LOG_PATH)
 
-now=datetime.now()
-tick_minute(now.hour,now.minute)
+    
+now=datetime.now(timezone.utc)
+FRA=tz.gettz('Europe/Paris')
+now=now.astimezone(tz=FRA)
+
+hour=now.hour
+minute=now.minute
+if len(argv)==2:
+    p=re.compile(r'^([0-9]{2}):([0-9]{2})$')
+    m=p.match(argv[1])
+    if m!=None:
+        hour=int(m.group(1))
+        minute=int(m.group(2))
+        log('APPEL MANUEL: %02d:%02d' % (hour,minute))
+
+tick_minute(hour,minute)
 
 
     
