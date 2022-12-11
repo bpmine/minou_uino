@@ -9,7 +9,6 @@
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <EEPROM.h>
-#include <ArduinoJson.h>
 
 #define ENABLE_MQTT
 //#define ENABLE_OTA
@@ -17,8 +16,6 @@
 #ifdef ENABLE_OTA
   #include <ArduinoOTA.h>
 #endif
-
-#define EEPROM_SIZE (1024)  
 
 #include <DHTesp.h>
 #include <uri/UriBraces.h>
@@ -35,30 +32,32 @@
 
 #include "move.h"
 
+#include <ArduinoJson.h>
+
 #ifdef ENABLE_MQTT
-  #include <EspMQTTClient.h>
+  #include <EspMQTTClient.h>  
 
-#define MQTT_TRACE_ON
-
-#define TOPIC_PREFIX  "/minou"
-#define TOPIC_CMD     "cmd"
-#define TOPIC_DATA    "data"
-#define TOPIC_LOG     "log"
-
-#define DELAY_TASK_REPORT_COMM  (3600*1000UL)
-#define DELAY_TASK_REPORT_DATA  (5*60*1000UL)
-#define DELAY_TASK_MQTT_OK      (800UL)
-
-EspMQTTClient mqttClient(
-  STASSID,
-  STAPSK,
-  MQTT_IP,
-  MQTT_LOGIN,
-  MQTT_PASS,
-  "minou_xxx"
-);
-
-int g_id=0;
+  #define MQTT_TRACE_ON
+  
+  #define TOPIC_PREFIX  "/minou"
+  #define TOPIC_CMD     "cmd"
+  #define TOPIC_DATA    "data"
+  #define TOPIC_LOG     "log"
+  
+  #define DELAY_TASK_REPORT_COMM  (3600*1000UL)
+  #define DELAY_TASK_REPORT_DATA  (5*60*1000UL)
+  #define DELAY_TASK_MQTT_OK      (800UL)
+  
+  EspMQTTClient mqttClient(
+    STASSID,
+    STAPSK,
+    MQTT_IP,
+    MQTT_LOGIN,
+    MQTT_PASS,
+    "minou_xxx"
+  );
+  
+  int g_id=0;
   
 #endif
 
@@ -87,8 +86,6 @@ Timer mvtmr=Timer(30000U);
 
 Timer tmrTempOut=Timer(40*1000U);
 Timer tmrTempBas=Timer(40*1000U);
-
-StaticJsonDocument<256> doc;
 
 /**
  * @brief Configuration des bandeau de LEDs
@@ -126,42 +123,22 @@ char prog_bas[SIZE_PROG] = "S26E33LrOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LgOS
 LdServer ldsrv_bas=LdServer(&server,leds_bas,NUM_LEDS,prog_bas,SIZE_PROG,"bas");
 LdServer ldsrv_haut=LdServer(&server,leds_haut,NUM_LEDS,prog_haut,SIZE_PROG,"haut");
 
-void addJsonVarInt(char *strBuffer,char *strName,int iVal)
-{
-  char tmp[100];
-  sprintf(tmp,"\"%s\":%d",strName,iVal);
-  strcat(strBuffer,tmp);
-}
+StaticJsonDocument<1024> jstmp;
+char tmpBuf[1024];
 
-void addJsonVarStr(char *strBuffer,char *strName,char *strVal)
+void makeJsonSensors(char *strJson,int maxSize)
 {
-  char tmp[100];
-  sprintf(tmp,"\"%s\":\"%s\"",strName,strVal);
-  strcat(strBuffer,tmp);
-}
+  jstmp.clear();
+  jstmp["temp_out"]=g_in_tempOut;
+  jstmp["temp_bas"]=g_in_tempBas;
+  jstmp["hum_out"]=g_in_humOut;
+  jstmp["hum_bas"]=g_in_humBas;
+  jstmp["capot"]=g_flgCapot;
+  jstmp["move_haut"]=mvHaut.getCount();
+  jstmp["move_bas"]=mvBas.getCount();
+  jstmp["move_capot"]=mvCapot.getCount();
 
-void makeJsonSensors(char *strJson)
-{
-  strcpy(strJson,"");
-  strcat(strJson,"{");
-  addJsonVarInt(strJson,"temp_out",g_in_tempOut);
-  strcat(strJson,",");
-  addJsonVarInt(strJson,"temp_bas",g_in_tempBas);
-  strcat(strJson,",");
-  addJsonVarInt(strJson,"hum_out",g_in_humOut);
-  strcat(strJson,",");
-  addJsonVarInt(strJson,"hum_bas",g_in_humBas);
-  strcat(strJson,",");
-  addJsonVarInt(strJson,"capot",g_flgCapot);
-  strcat(strJson,",");
-  addJsonVarInt(strJson,"move_haut",mvHaut.getCount());
-  strcat(strJson,",");
-  addJsonVarInt(strJson,"move_bas",mvBas.getCount());
-  strcat(strJson,",");
-  addJsonVarInt(strJson,"move_capot",mvCapot.getCount());
-  strcat(strJson,"}");
-  
-  server.send(200, "text/plain", strJson);  
+  serializeJson(jstmp, strJson,maxSize);
 }
 
 
@@ -190,10 +167,9 @@ void taskReportComm(void)
 }
 
 void taskReportData(void)
-{
-  char strJson[500];
-  makeJsonSensors(strJson);
-  sendData(strJson);
+{ 
+  makeJsonSensors(tmpBuf,sizeof(tmpBuf));
+  sendData(tmpBuf);
   
   mqttClient.executeDelayed(DELAY_TASK_REPORT_DATA, taskReportData);
 }
@@ -206,7 +182,7 @@ void setup_mqtt(void)
   mqttClient.setMqttClientName(strName);
   Serial.print("Start Mqtt ");
   Serial.print(strName);
-  Serial.println("...");
+  Serial.println("...");  
 
   mqttClient.enableMQTTPersistence();
 
@@ -221,35 +197,24 @@ void setup_mqtt(void)
 
 void onReceiveCmd(const String &payload)
 {
+  Serial.print("Cmd Recue: ");
+  Serial.println(payload);  
+}
+
+void onReceiveCmdHaut(const String &payload)
+{
+  Serial.print("Cmd LEDs Haut Recue: ");
   Serial.println(payload);
-  
-  deserializeJson(doc, payload);
 
-  auto error = deserializeJson(doc, payload);
-  if (error) 
-  {
-    Serial.print(F("deserializeJson() failed with code "));
-    Serial.println(error.c_str());
-    return;
-  }
+  ldsrv_haut.processCmd(payload,tmpBuf,sizeof(tmpBuf));
+}
 
-  if (doc["cmd"]=="clearall")
-  {
-    clearAll(leds_haut);
-    clearAll(leds_bas);
-  }
-  else if (doc["cmd"]=="clrbas")
-  {
-    clearAll(leds_bas);    
-  }
-  else if (doc["cmd"]=="clrhaut")
-  {
-    clearAll(leds_haut);
-  }
-  else if (doc["cmd"]=="setbas")
-  {
-    //clearAll(leds_haut);
-  }
+void onReceiveCmdBas(const String &payload)
+{  
+  Serial.print("Cmd LEDs Bas Recue: ");
+  Serial.println(payload);
+
+  ldsrv_bas.processCmd(payload,tmpBuf,sizeof(tmpBuf));  
 }
 
 void onConnectionEstablished()
@@ -257,7 +222,11 @@ void onConnectionEstablished()
   Serial.println("Connection Mqtt.");
 
   char strTopicCmd[50];
-  sprintf(strTopicCmd,"%s/%s/%03d",TOPIC_PREFIX,TOPIC_CMD,g_id);
+  sprintf(strTopicCmd,"%s/%s/%03d/leds/haut",TOPIC_PREFIX,TOPIC_CMD,g_id);  
+  mqttClient.subscribe(strTopicCmd,onReceiveCmdHaut);
+  sprintf(strTopicCmd,"%s/%s/%03d/leds/bas",TOPIC_PREFIX,TOPIC_CMD,g_id);  
+  mqttClient.subscribe(strTopicCmd,onReceiveCmdBas);
+  sprintf(strTopicCmd,"%s/%s/%03d/leds",TOPIC_PREFIX,TOPIC_CMD,g_id);  
   mqttClient.subscribe(strTopicCmd,onReceiveCmd);
 
   sendLog("MQTT Connected");
@@ -301,15 +270,13 @@ void clearAll(CRGB *pLeds)
 */
 void handleWdgInfo()
 { 
-  String s="{\"enabled\"=\"";
-  s+=wdg.isRunning();
-  s+="\", \"duration\"=\"";
-  s+=wdg.getDuration_ms()/1000U;
-  s+="\", \"remaining\"=\"";
-  s+=wdg.getRemaining_ms()/1000U;  
-  s+="\"}";
+  jstmp.clear();
+  jstmp["enabled"]=wdg.isRunning();
+  jstmp["duration"]=wdg.getDuration_ms();
+  jstmp["remaining"]=wdg.getRemaining_ms();
+  serializeJson(jstmp, tmpBuf,sizeof(tmpBuf));  
   
-  server.send(200, "text/plain", s);
+  server.send(200, "text/plain", tmpBuf);
 }
 
 /**
@@ -424,28 +391,24 @@ void handleSetLeds()
  * Retourne les informations sur le noeud
 */
 void handleInfo()
-{      
-  char strJson[500];
-  strcpy(strJson,"[{");
-  addJsonVarStr(strJson,"name","haut");
-  addJsonVarStr(strJson,"description","Gestion des LEDs du haut de la cabane du minou");
-  addJsonVarInt(strJson,"num_leds",NUM_LEDS);
-  strcat(strJson,"},{");
-  addJsonVarStr(strJson,"name","bas");
-  addJsonVarStr(strJson,"description","Gestion des LEDs du bas de la cabane du minou");
-  addJsonVarInt(strJson,"num_leds",NUM_LEDS);
-  strcat(strJson,"}]");
-  
-  server.send(200, "text/plain", strJson);
+{ 
+  jstmp.clear();
+  jstmp[0]["name"]="haut";
+  jstmp[0]["description"]="Gestion des LEDs du haut de la cabane du minou";
+  jstmp[0]["num_leds"]=NUM_LEDS;
+  jstmp[1]["name"]="bas";
+  jstmp[1]["description"]="Gestion des LEDs du bas de la cabane du minou";
+  jstmp[1]["num_leds"]=NUM_LEDS;
+  serializeJson(jstmp, tmpBuf,sizeof(tmpBuf));
+    
+  server.send(200, "text/plain", tmpBuf);
 }
-
-
 
 void handleSensors(void)
 {
   char strJson[500]="";
 
-  makeJsonSensors(strJson);
+  makeJsonSensors(strJson,500);
   
   server.send(200, "text/plain", strJson);  
 }
@@ -559,38 +522,39 @@ void setup(void)
   setAll(leds_bas,CRGB::Red);
   setAll(leds_haut,CRGB::Blue);
   FastLED.show();
-  delay(2000);
+  Serial.println("Leds ok");
+  delay(500);
   
-  clearAll(leds_bas);
-  clearAll(leds_haut);
-  FastLED.show();
-
   #ifndef ENABLE_MQTT
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  Serial.println("");
-
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) 
-  {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-  WiFi.setAutoReconnect(true);
-  WiFi.persistent(true);
-
-  if (MDNS.begin("esp8266")) 
-  {
-    Serial.println("MDNS responder started");
-  }
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, password);
+    Serial.println("");
+  
+    // Wait for connection
+    while (WiFi.status() != WL_CONNECTED) 
+    {
+      delay(500);
+      Serial.print(".");
+    }
+    Serial.println("");
+    Serial.print("Connected to ");
+    Serial.println(ssid);
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+    WiFi.setAutoReconnect(true);
+    WiFi.persistent(true);
+  
+    if (MDNS.begin("esp8266")) 
+    {
+      Serial.println("MDNS responder started");
+    }
   #else
     setup_mqtt();  
   #endif
+
+  clearAll(leds_bas);
+  clearAll(leds_haut);
+  FastLED.show();
 
   ldsrv_haut.init();
   ldsrv_bas.init();
@@ -606,6 +570,7 @@ void setup(void)
   server.on("/sensors", handleSensors);  
 
   server.onNotFound(handleNotFound);
+  server.enableCORS(true);
 
   server.begin();
   Serial.println("HTTP server started");
@@ -713,8 +678,7 @@ void test_loop(void)
 
   #ifdef ENABLE_OTA
     ArduinoOTA.handle();
-  #endif  
-
+  #endif
 }
 
 void wdgSwitchAllOff()
@@ -725,6 +689,10 @@ void wdgSwitchAllOff()
 
 void loop_app()
 {
+  #ifdef ENABLE_MQTT
+    mqttClient.loop();
+  #endif
+  
   measureTempHum(dht_bas,&g_in_tempBas,&g_in_humBas,&tmrTempBas);
   measureTempHum(dht_out,&g_in_tempOut,&g_in_humOut,&tmrTempOut);
 
@@ -784,11 +752,7 @@ void loop_app()
   else
   {
     digitalWrite(PIN_LED_BAS,LOW);
-  }  
-
-  #ifdef ENABLE_MQTT
-    mqttClient.loop();
-  #endif
+  }
 }
 
 void loop()

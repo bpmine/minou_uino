@@ -20,6 +20,7 @@ class LdServer
     void clearAll(void);
     LdAnim m_anim;
     bool flg_runProg;
+    CRGB &col(const char *strCol);
 
   public:
     LdServer(ESP8266WebServer *pServer,CRGB *pLeds,int numLeds,char *pProg,int maxSizeProg,char *strName);
@@ -27,6 +28,8 @@ class LdServer
     void handlerSetLeds(void);
     void handlerClearAll(void);
     void handlerAnim(void);
+
+    void processCmd(const String &strCmd,char *strAnswer,int maxSize);
 
     void tick(void);
     void stopAnim(void);

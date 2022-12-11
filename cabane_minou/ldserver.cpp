@@ -1,7 +1,7 @@
 #include "ldserver.h"
 #include <arduino.h>
 
-
+#include <ArduinoJson.h>
 
 void LdServer::setAll(CRGB a)
 {
@@ -244,6 +244,120 @@ void LdServer::stopAnim(void)
 {
   flg_runProg=false;
   clearAll();
+}
+
+CRGB off(0,0,0);
+CRGB on(127,127,127);
+CRGB red(127,0,0);
+CRGB green(0,127,0);
+CRGB blue(0,0,127);
+CRGB yellow(127,127,0);
+CRGB orange(127,82,0);
+CRGB pink(127,9,73);
+CRGB cyan(0,127,127);
+CRGB violet(127,0,127);
+
+
+CRGB &LdServer::col(const char *strCol)
+{
+  if (strCol==NULL)
+    return off;
+  
+  if (strcmp(strCol,"r")==0)
+  {
+    return red;
+  }
+  else if (strcmp(strCol,"g")==0)
+  {
+    return green;
+  }
+  else if (strcmp(strCol,"b")==0)
+  {
+    return blue;
+  }  
+  else if (strcmp(strCol,"w")==0)
+  {
+    return on;
+  }  
+  else if (strcmp(strCol,"y")==0)
+  {
+    return yellow;
+  }  
+  else if (strcmp(strCol,"o")==0)
+  {
+    return orange;
+  }  
+  else if (strcmp(strCol,"p")==0)
+  {
+    return pink;
+  }  
+  else if (strcmp(strCol,"c")==0)
+  {
+    return cyan;
+  }  
+  else if (strcmp(strCol,"v")==0)
+  {
+    return violet;
+  }  
+  else
+  {
+    return off;
+  }
+}
+
+extern StaticJsonDocument<1024> jstmp;
+
+void LdServer::processCmd(const String &strCmd,char *strAnswer,int maxSize)
+{
+  auto error = deserializeJson(jstmp, strCmd);
+  if (error) 
+  {
+    Serial.print(F("deserializeJson() failed with code "));
+    Serial.println(error.c_str());
+    return;
+  }
+  
+  if (jstmp["cmd"]=="clrall")
+  {    
+    clearAll();
+    Serial.println("EXEC clrall");
+    jstmp.clear();
+    jstmp["cmd"]="clrall";
+    jstmp["result"]=1;
+    
+  }
+  else if (jstmp["cmd"]=="setall")
+  {
+    const char *strCol=jstmp["col"];
+    setAll(col(strCol));
+    Serial.println("EXEC setall");
+    jstmp.clear();
+    jstmp["cmd"]="setall";
+    jstmp["col"]=strCol;
+    jstmp["result"]=1;
+  }
+  else if (jstmp["cmd"]=="set")
+  {    
+    const char *strCol=jstmp["col"];
+    setAll(col(strCol));
+    int start=jstmp["start"];
+    int end=jstmp["end"];
+    
+    Serial.println("EXEC set");
+    jstmp.clear();
+    jstmp["cmd"]="set";
+    jstmp["col"]=strCol;
+    jstmp["start"]=start;
+    jstmp["end"]=end;
+    jstmp["result"]=1;
+  }
+  else
+  {
+    jstmp.clear();
+    jstmp["result"]=0;
+  }
+
+  serializeJson(jstmp, strAnswer,maxSize);
 }
 
 LdServer::LdServer(ESP8266WebServer *pServer,CRGB *pLeds,int numLeds,char *pProg,int maxSizeProg,char *strName)
