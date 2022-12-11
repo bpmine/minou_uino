@@ -20,7 +20,8 @@ class LdServer
     void clearAll(void);
     LdAnim m_anim;
     bool flg_runProg;
-    CRGB &col(const char *strCol);
+    CRGB col(const char *strCol);
+    CRGB rgb(unsigned long rgb);
 
   public:
     LdServer(ESP8266WebServer *pServer,CRGB *pLeds,int numLeds,char *pProg,int maxSizeProg,char *strName);

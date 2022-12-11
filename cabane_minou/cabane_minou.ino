@@ -289,7 +289,7 @@ void handleWdgInfo()
  *   - /leds/wdg?delay=456 => Configure le delai du watchdog (en s). Retourne WDG DELAY 456.
 */
 void handleWdg()
-{
+{ 
   if (server.args()==0)
   {
     if (wdg.isRunning()==true)
@@ -342,7 +342,7 @@ void handleWdg()
  * @brief Controlleur WS eteint toutes les LEDs /leds/clearall
 */
 void handleClearAll()
-{  
+{   
   String lds=server.pathArg(0);
   if (lds=="haut")
   {
@@ -366,9 +366,6 @@ void handleClearAll()
 */
 void handleSetLeds()
 {
-  if (wdg.isRunning()==true)
-    wdg.start();
-
   String lds=server.pathArg(0);
   if (lds=="haut")
   {
@@ -405,7 +402,7 @@ void handleInfo()
 }
 
 void handleSensors(void)
-{
+{  
   char strJson[500]="";
 
   makeJsonSensors(strJson,500);
@@ -424,9 +421,6 @@ void handleSensors(void)
 */
 void handleAnim()
 {
-  if (wdg.isRunning()==true)
-    wdg.start();
-
   String lds=server.pathArg(0);
   if (lds=="haut")
   {

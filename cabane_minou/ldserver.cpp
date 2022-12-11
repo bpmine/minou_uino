@@ -3,6 +3,19 @@
 
 #include <ArduinoJson.h>
 
+CRGB off(0,0,0);
+CRGB on(127,127,127);
+CRGB red(127,0,0);
+CRGB green(0,127,0);
+CRGB blue(0,0,127);
+CRGB yellow(127,127,0);
+CRGB orange(127,82,0);
+CRGB pink(127,9,73);
+CRGB cyan(0,127,127);
+CRGB violet(127,0,127);
+CRGB custom(0,0,0);
+
+
 void LdServer::setAll(CRGB a)
 {
   for (int i=0;i<m_numLeds;i++)
@@ -56,66 +69,10 @@ void LdServer::handlerSetLeds(void)
     }
     else if (strcmp(m_pServer->argName(i).c_str(),"col")==0)
     {
-      if (strcmp(m_pServer->arg(i).c_str(),"r")==0)
-      {
-        r=127;
-        g=0;
-        b=0;    
-      }
-      else if (strcmp(m_pServer->arg(i).c_str(),"g")==0)
-      {
-        r=0;
-        g=127;
-        b=0;    
-      }
-      else if (strcmp(m_pServer->arg(i).c_str(),"b")==0)
-      {
-        r=0;
-        g=0;
-        b=127;    
-      }
-      else if (strcmp(m_pServer->arg(i).c_str(),"w")==0)
-      {
-        r=127;
-        g=127;
-        b=127;    
-      }
-      else if (strcmp(m_pServer->arg(i).c_str(),"0")==0)
-      {
-        r=0;
-        g=0;
-        b=0;    
-      }
-      else if (strcmp(m_pServer->arg(i).c_str(),"y")==0)
-      {
-        r=127;
-        g=127;
-        b=0;    
-      }
-      else if (strcmp(m_pServer->arg(i).c_str(),"o")==0)
-      {
-        r=127;
-        g=82;
-        b=0;    
-      }
-      else if (strcmp(m_pServer->arg(i).c_str(),"p")==0)
-      {
-        r=127;
-        g=9;
-        b=73;    
-      }
-      else if (strcmp(m_pServer->arg(i).c_str(),"c")==0)
-      {
-        r=0;
-        g=127;
-        b=127;    
-      }
-      else if (strcmp(m_pServer->arg(i).c_str(),"v")==0)
-      {
-        r=127;
-        g=0;
-        b=127;    
-      }
+      CRGB c=col(m_pServer->arg(i).c_str());
+      r=c.r;
+      g=c.g;
+      b=c.b;      
     }
     else if (strcmp(m_pServer->argName(i).c_str(),"r")==0)
     {
@@ -246,19 +203,7 @@ void LdServer::stopAnim(void)
   clearAll();
 }
 
-CRGB off(0,0,0);
-CRGB on(127,127,127);
-CRGB red(127,0,0);
-CRGB green(0,127,0);
-CRGB blue(0,0,127);
-CRGB yellow(127,127,0);
-CRGB orange(127,82,0);
-CRGB pink(127,9,73);
-CRGB cyan(0,127,127);
-CRGB violet(127,0,127);
-
-
-CRGB &LdServer::col(const char *strCol)
+CRGB LdServer::col(const char *strCol)
 {
   if (strCol==NULL)
     return off;
@@ -305,6 +250,17 @@ CRGB &LdServer::col(const char *strCol)
   }
 }
 
+CRGB LdServer::rgb(unsigned long rgb)
+{
+  int r=(rgb&(0xFF0000)>>16);
+  int g=(rgb&(0x00FF00)>>8);
+  int b=rgb&(0x0000FF);
+  
+  custom.setRGB(r,g,b);
+  return custom;  
+}
+
+
 extern StaticJsonDocument<1024> jstmp;
 
 void LdServer::processCmd(const String &strCmd,char *strAnswer,int maxSize)
@@ -314,6 +270,9 @@ void LdServer::processCmd(const String &strCmd,char *strAnswer,int maxSize)
   {
     Serial.print(F("deserializeJson() failed with code "));
     Serial.println(error.c_str());
+    jstmp.clear();
+    jstmp["msg"]="Erreur de parsing!";
+    jstmp["result"]=0;
     return;
   }
   
@@ -321,39 +280,93 @@ void LdServer::processCmd(const String &strCmd,char *strAnswer,int maxSize)
   {    
     clearAll();
     Serial.println("EXEC clrall");
-    jstmp.clear();
-    jstmp["cmd"]="clrall";
-    jstmp["result"]=1;
-    
+    jstmp["result"]=1;    
   }
   else if (jstmp["cmd"]=="setall")
   {
-    const char *strCol=jstmp["col"];
-    setAll(col(strCol));
     Serial.println("EXEC setall");
-    jstmp.clear();
-    jstmp["cmd"]="setall";
-    jstmp["col"]=strCol;
-    jstmp["result"]=1;
+    
+    if (jstmp.containsKey("col"))
+    {
+      const char *strCol=jstmp["col"];
+      setAll(col(strCol));
+      jstmp["result"]=1;
+    }
+    else if (jstmp.containsKey("rgb"))
+    {
+      unsigned long ulCol=jstmp["rgb"];
+      setAll(rgb(ulCol));      
+      jstmp["result"]=1;
+    }
+    else
+    {
+      jstmp["result"]=0;
+    }    
   }
   else if (jstmp["cmd"]=="set")
-  {    
-    const char *strCol=jstmp["col"];
-    setAll(col(strCol));
-    int start=jstmp["start"];
-    int end=jstmp["end"];
-    
+  {
     Serial.println("EXEC set");
-    jstmp.clear();
-    jstmp["cmd"]="set";
-    jstmp["col"]=strCol;
-    jstmp["start"]=start;
-    jstmp["end"]=end;
+    
+    int start=0;
+    int end=m_numLeds;
+    CRGB c=off;
+
+    if (jstmp.containsKey("start"))
+      start=jstmp["start"];
+
+    if (jstmp.containsKey("end"))
+      end=jstmp["end"];
+    
+    if (jstmp.containsKey("col"))
+    {
+      const char *strCol=jstmp["col"];
+      c=col(strCol);
+    }
+    if (jstmp.containsKey("rgb"))
+    {
+      unsigned long ulCol=jstmp["rgb"];
+      c=rgb(ulCol);
+    }
+
+    if (start<0)
+      start=0;
+    if (end>m_numLeds)
+      end=m_numLeds;
+    if (start>end)
+      end=start;
+
+    for (int i=start;i<=end;i++)
+    {
+      m_pLeds[i]=c;
+    }
+
+    FastLED.show();
+    
     jstmp["result"]=1;
+    jstmp["start"]=start;
+    jstmp["end"]=end;    
+  }
+  else if (jstmp["cmd"]=="anim")
+  {
+    Serial.println("EXEC anim");
+    
+    if (jstmp.containsKey("enable"))
+    {    
+      if (jstmp.containsKey("prog"))
+      {
+        const char *strProg=jstmp["prog"];
+        strncpy(m_pProg,strProg,m_maxSizeProg);
+        m_pProg[m_maxSizeProg-1]=0;        
+        m_anim.init(m_pProg, m_maxSizeProg);
+      }
+      
+      flg_runProg=jstmp["enable"]==1?true:false;      
+    }    
   }
   else
   {
     jstmp.clear();
+    jstmp["msg"]="Unknown cmd";
     jstmp["result"]=0;
   }
 
