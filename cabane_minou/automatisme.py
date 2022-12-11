@@ -86,8 +86,9 @@ ledsCabaneBas=ArdLeds('cabane_bas',IP_CABANE,36,'leds/bas')
 ledsTour=ArdLeds('tour',IP_TOUR,33)
 
 
-PROG_INITIAL_TOUR='S26E33LrOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LgOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LbOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOW*'
+#PROG_INITIAL_TOUR='S26E33LrOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LgOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LbOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOW*'
 PROG_1_CABANE='D2LrAWLgAWLbAW*'
+PROG_INITIAL_TOUR='D1S24E33LrOS1E23LgOWS24E33LbOS1E23LrOWS24E33LgOS1E23LbOW*'
 
 def clearAll():
     ledsCabaneBas.disableAnim()
@@ -112,7 +113,7 @@ def log(msg):
 
 
 def tick_minute(hour,minute):
-    log('Tick %d:%d' % (hour,minute) )
+    #log('Tick %d:%d' % (hour,minute) )
 
     try:
         ledsCabaneBas.getWdg()
