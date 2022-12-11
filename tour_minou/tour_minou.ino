@@ -12,9 +12,11 @@
 #include "FastLED.h"
 #include "ldanim.h"
 
-#include "wifi_code.h"
+#include "credentials.h"
 
+#include <ArduinoJson.h>
 
+#define ENABLE_MQTT
 
 const char* ssid = STASSID;
 const char* password = STAPSK;
@@ -51,6 +53,105 @@ long g_delay_ms=3600L*1000L;
 char prog[SIZE_PROG] = "S26E33LrOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LgOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LbOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOW*";
 bool flg_runProg=false;
 LdAnim anim = LdAnim(leds, NUM_LEDS);
+
+#ifdef ENABLE_MQTT
+  #include <EspMQTTClient.h>  
+
+  #define MQTT_TRACE_ON
+  
+  #define TOPIC_PREFIX  "/minou"
+  #define TOPIC_CMD     "cmd"
+  #define TOPIC_DATA    "data"
+  #define TOPIC_LOG     "log"
+  
+  #define DELAY_TASK_REPORT_COMM  (3600*1000UL)
+  #define DELAY_TASK_REPORT_DATA  (5*60*1000UL)
+  #define DELAY_TASK_MQTT_OK      (800UL)
+  
+  EspMQTTClient mqttClient(
+    STASSID,
+    STAPSK,
+    MQTT_IP,
+    MQTT_LOGIN,
+    MQTT_PASS,
+    "minou_xxx"
+  );
+  
+  int g_id=0;
+  
+#endif
+
+StaticJsonDocument<1024> jstmp;
+char tmpBuf[1024];
+
+CRGB off(0,0,0);
+CRGB on(127,127,127);
+CRGB red(127,0,0);
+CRGB green(0,127,0);
+CRGB blue(0,0,127);
+CRGB yellow(127,127,0);
+CRGB orange(127,82,0);
+CRGB pink(127,9,73);
+CRGB cyan(0,127,127);
+CRGB violet(127,0,127);
+CRGB custom(0,0,0);
+
+CRGB col(const char *strCol)
+{
+  if (strCol==NULL)
+    return off;
+  
+  if (strcmp(strCol,"r")==0)
+  {
+    return red;
+  }
+  else if (strcmp(strCol,"g")==0)
+  {
+    return green;
+  }
+  else if (strcmp(strCol,"b")==0)
+  {
+    return blue;
+  }  
+  else if (strcmp(strCol,"w")==0)
+  {
+    return on;
+  }  
+  else if (strcmp(strCol,"y")==0)
+  {
+    return yellow;
+  }  
+  else if (strcmp(strCol,"o")==0)
+  {
+    return orange;
+  }  
+  else if (strcmp(strCol,"p")==0)
+  {
+    return pink;
+  }  
+  else if (strcmp(strCol,"c")==0)
+  {
+    return cyan;
+  }  
+  else if (strcmp(strCol,"v")==0)
+  {
+    return violet;
+  }  
+  else
+  {
+    return off;
+  }
+}
+
+CRGB rgb(unsigned long rgb)
+{
+  int r=(rgb&(0xFF0000)>>16);
+  int g=(rgb&(0x00FF00)>>8);
+  int b=rgb&(0x0000FF);
+  
+  custom.setRGB(r,g,b);
+  return custom;  
+}
 
 /**
  * @brief Allume toutes les LEDs avec la couleur fournie
@@ -407,16 +508,15 @@ void handleClearAll()
 void handleInfo()
 {    
   digitalWrite(led, 1);
+
+  jstmp.clear();
+  jstmp[0]["name"]="LedsTourMinou";
+  jstmp[0]["description"]="Gestion des LEDs de la tour de minou";
+  jstmp[0]["num_leds"]=NUM_LEDS;
+  serializeJson(jstmp, tmpBuf,sizeof(tmpBuf));
+    
+  server.send(200, "text/plain", tmpBuf);
   
-  String s="{";
-  s+="'name':'LedsTourMinou',";
-  s+="'description':'Gestion des LEDs de la tour du minou'";
-  s+="'num_leds':'";
-  s+=NUM_LEDS;
-  s+="'";
-  s+="}";
-  
-  server.send(200, "text/plain", s);
   digitalWrite(led, 0);
 }
 
@@ -490,6 +590,191 @@ void handleNotFound()
   digitalWrite(led, 0);
 }
 
+#ifdef ENABLE_MQTT
+void sendLog(char *strMsg)
+{
+  char strTopicLog[50];
+  sprintf(strTopicLog,"%s/%s/%03d",TOPIC_PREFIX,TOPIC_LOG,g_id);
+  mqttClient.publish(strTopicLog, strMsg);
+}
+
+void sendData(char *strMsg)
+{
+  char strTopicData[50];
+  sprintf(strTopicData,"%s/%s/%03d",TOPIC_PREFIX,TOPIC_DATA,g_id);
+  mqttClient.publish(strTopicData, strMsg);
+}
+
+void processCmd(const String &strCmd,char *strAnswer,int maxSize)
+{
+  auto error = deserializeJson(jstmp, strCmd);
+  if (error) 
+  {
+    Serial.print(F("deserializeJson() failed with code "));
+    Serial.println(error.c_str());
+    jstmp.clear();
+    jstmp["msg"]="Erreur de parsing!";
+    jstmp["result"]=0;
+    return;
+  }
+  
+  if (jstmp["cmd"]=="clrall")
+  {    
+    clearAll(leds);
+    Serial.println("EXEC clrall");
+    jstmp["result"]=1;    
+  }
+  else if (jstmp["cmd"]=="setall")
+  {
+    Serial.println("EXEC setall");
+    
+    if (jstmp.containsKey("col"))
+    {
+      const char *strCol=jstmp["col"];
+      setAll(leds,col(strCol));
+      jstmp["result"]=1;
+    }
+    else if (jstmp.containsKey("rgb"))
+    {
+      unsigned long ulCol=jstmp["rgb"];
+      setAll(leds,rgb(ulCol));      
+      jstmp["result"]=1;
+    }
+    else
+    {
+      jstmp["result"]=0;
+    }    
+  }
+  else if (jstmp["cmd"]=="set")
+  {
+    Serial.println("EXEC set");
+    
+    int start=0;
+    int end=NUM_LEDS-1;
+    CRGB c=off;
+
+    if (jstmp.containsKey("start"))
+      start=jstmp["start"];
+
+    if (jstmp.containsKey("end"))
+      end=jstmp["end"];
+    
+    if (jstmp.containsKey("col"))
+    {
+      const char *strCol=jstmp["col"];
+      c=col(strCol);
+    }
+    if (jstmp.containsKey("rgb"))
+    {
+      unsigned long ulCol=jstmp["rgb"];
+      c=rgb(ulCol);
+    }
+
+    if (start<0)
+      start=0;
+    if (end>=NUM_LEDS)
+      end=NUM_LEDS-1;
+    if (start>end)
+      end=start;
+
+    for (int i=start;i<=end;i++)
+    {
+      leds[i]=c;
+    }
+
+    FastLED.show();
+    
+    jstmp["result"]=1;
+    jstmp["start"]=start;
+    jstmp["end"]=end;    
+  }
+  else if (jstmp["cmd"]=="anim")
+  {
+    Serial.println("EXEC anim");
+    
+    if (jstmp.containsKey("enable"))
+    {    
+      if (jstmp.containsKey("prog"))
+      {
+        const char *strProg=jstmp["prog"];
+        strncpy(prog,strProg,SIZE_PROG);
+        prog[SIZE_PROG-1]=0;        
+        anim.init(prog,SIZE_PROG);
+      }
+      
+      flg_runProg=jstmp["enable"]==1?true:false;      
+    }    
+  }
+  else
+  {
+    jstmp.clear();
+    jstmp["msg"]="Unknown cmd";
+    jstmp["result"]=0;
+  }
+
+  serializeJson(jstmp, strAnswer,maxSize);
+}
+
+
+void taskReportComm(void)
+{
+  char strReport[50];
+  sprintf(strReport,"comm %d",mqttClient.getConnectionEstablishedCount());
+  sendLog(strReport);
+  
+  mqttClient.executeDelayed(DELAY_TASK_REPORT_COMM, taskReportComm);
+}
+
+void taskReportData(void)
+{ 
+  //makeJsonSensors(tmpBuf,sizeof(tmpBuf));
+  //sendData(tmpBuf);
+  
+  mqttClient.executeDelayed(DELAY_TASK_REPORT_DATA, taskReportData);
+}
+
+void setup_mqtt(void)
+{
+  g_id=MQTT_ID;
+  static char strName[15];
+  sprintf(strName,"minou_%03d",g_id);
+  mqttClient.setMqttClientName(strName);
+  Serial.print("Start Mqtt ");
+  Serial.print(strName);
+  Serial.println("...");  
+
+  mqttClient.enableMQTTPersistence();
+
+  #ifdef MQTT_TRACE_ON
+    mqttClient.enableDebuggingMessages();
+  #endif
+
+  mqttClient.executeDelayed(DELAY_TASK_REPORT_COMM, taskReportComm);
+  mqttClient.executeDelayed(DELAY_TASK_REPORT_DATA, taskReportData);
+  //client.executeDelayed(DELAY_TASK_MQTT_OK, taskBlinkLed);  
+}
+
+void onReceiveCmd(const String &payload)
+{
+  Serial.print("Cmd Recue: ");
+  Serial.println(payload);  
+
+  processCmd(payload,tmpBuf,sizeof(tmpBuf));
+}
+
+void onConnectionEstablished()
+{
+  Serial.println("Connection Mqtt.");
+
+  char strTopicCmd[50];
+  sprintf(strTopicCmd,"%s/%s/%03d/leds",TOPIC_PREFIX,TOPIC_CMD,g_id);  
+  mqttClient.subscribe(strTopicCmd,onReceiveCmd);
+
+  sendLog("MQTT Connected");
+}
+
+#endif
+
 /**
  * @brief Setup d'initialisation de l'arduino
 */
@@ -509,31 +794,35 @@ void setup(void)
   FastLED.show();
   delay(1000);
   
+  #ifndef ENABLE_MQTT
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, password);
+    Serial.println("");
+  
+    // Wait for connection
+    while (WiFi.status() != WL_CONNECTED) 
+    {
+      delay(500);
+      Serial.print(".");
+    }
+    Serial.println("");
+    Serial.print("Connected to ");
+    Serial.println(ssid);
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+    WiFi.setAutoReconnect(true);
+    WiFi.persistent(true);
+  
+    if (MDNS.begin("esp8266")) 
+    {
+      Serial.println("MDNS responder started");
+    }
+  #else
+    setup_mqtt();
+  #endif
+
   clearAll(leds);
   FastLED.show();
-  
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  Serial.println("");
-
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) 
-  {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-  WiFi.setAutoReconnect(true);
-  WiFi.persistent(true);
-
-  if (MDNS.begin("esp8266")) 
-  {
-    Serial.println("MDNS responder started");
-  }
 
   server.on("/leds/write", handleWrite);
   server.on("/leds/clearall", handleClearAll);
@@ -582,4 +871,8 @@ void loop(void)
       FastLED.show();
     }    
   }
+
+  #ifdef ENABLE_MQTT
+    mqttClient.loop();
+  #endif  
 }

@@ -308,7 +308,7 @@ void LdServer::processCmd(const String &strCmd,char *strAnswer,int maxSize)
     Serial.println("EXEC set");
     
     int start=0;
-    int end=m_numLeds;
+    int end=m_numLeds-1;
     CRGB c=off;
 
     if (jstmp.containsKey("start"))
@@ -330,8 +330,8 @@ void LdServer::processCmd(const String &strCmd,char *strAnswer,int maxSize)
 
     if (start<0)
       start=0;
-    if (end>m_numLeds)
-      end=m_numLeds;
+    if (end>=m_numLeds)
+      end=m_numLeds-1;
     if (start>end)
       end=start;
 
