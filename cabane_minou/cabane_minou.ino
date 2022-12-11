@@ -1,6 +1,8 @@
 /**
  * @file cabane_minou.ino
  * 
+ * Cible: NodeMCU V1.0 (ESP 12E)
+ * 
  * @brief Gestion de l'éclairage de la tour de Minou
 */
 #include <ESP8266WiFi.h>

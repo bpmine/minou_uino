@@ -9,6 +9,7 @@
 #include <ESP8266mDNS.h>
 
 #include <Wire.h>
+//#define FASTLED_ESP8266_D1_PIN_ORDER
 #include "FastLED.h"
 #include "ldanim.h"
 

@@ -1,7 +1,7 @@
 import requests
 
-IP_TOUR='192.168.1.42'
-IP_CABANE='192.168.1.44'
+IP_TOUR='192.168.2.130'
+IP_CABANE='192.168.2.155'
 
 
 def test_tour():
@@ -94,9 +94,9 @@ def read_cabane():
     
 
 
-clear_all() 
+#clear_all() 
 
-#init_tour()  
+init_tour()  
 #init_cabane()
 
 #read_cabane()

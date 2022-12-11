@@ -7,6 +7,7 @@
 #include "ldanim.h"
 
 #ifndef WIN32
+    //#define FASTLED_ESP8266_D1_PIN_ORDER
     #include "FastLED.h"    
     #include <arduino.h>
 #endif
