@@ -7,12 +7,14 @@ from sys import argv
 import requests
 import re
 
-IP_CABANE='192.168.2.155'
-IP_TOUR='192.168.2.130'
+IP_CABANE='192.168.2.21'
+IP_TOUR='192.168.2.22'
 
 LOG_PATH='/var/log/domgw'
 LOG_FILENAME='automatisme.log'
 LOG_ENABLED=True
+
+prev_missing=[]
 
 class ArdLeds:
     GREEN='g'
@@ -45,31 +47,53 @@ class ArdLeds:
         print(resp.text)
 
     def getWdg(self):
-        resp=requests.get("http://%s/leds/wdg" % (self.ip))
-        return resp.json
+        try:
+            resp=requests.get("http://%s/leds/wdg" % (self.ip))
+            if resp!=None and resp.status_code==200 and resp.text=='WDG OK':
+                return True                
+        except:
+            pass
+        
+        return False
 
     def sendCmd(self,start,end,col):
-        assert start>0 and start<=self.nbre_leds
-        assert end>=start and end<=self.nbre_leds
+        try:
+            assert start>0 and start<=self.nbre_leds
+            assert end>=start and end<=self.nbre_leds
+            
+            resp=requests.get("http://%s/%s/set?start=%d&end=%d&col=%s" % (self.ip,self.base_url,start,end,col))
+            if resp!=None and resp.status_code==200:
+                print(resp.text)
+                return True            
+        except:
+            pass
         
-        resp=requests.get("http://%s/%s/set?start=%d&end=%d&col=%s" % (self.ip,self.base_url,start,end,col))
-        print(resp.text)
+        return False
 
     def setAnim(self,prog):
-        resp=requests.get('http://%s/%s/anim?enable=0' % (self.ip,self.base_url))
-        print(resp.text)
-        resp=requests.get('http://%s/%s/anim?prog=%s' % (self.ip,self.base_url,prog))
-        print(resp.text)
-        resp=requests.get('http://%s/%s/anim?enable=1' % (self.ip,self.base_url))
-        print(resp.text)
+        try:
+            resp=requests.get('http://%s/%s/anim?enable=0' % (self.ip,self.base_url))
+            print(resp.text)
+            resp=requests.get('http://%s/%s/anim?prog=%s' % (self.ip,self.base_url,prog))
+            print(resp.text)
+            resp=requests.get('http://%s/%s/anim?enable=1' % (self.ip,self.base_url))
+            print(resp.text)
+        except:
+            pass
 
     def enableAnim(self):
-        resp=requests.get('http://%s/%s/anim?enable=1' % (self.ip,self.base_url))
-        print(resp.text)
+        try:
+            resp=requests.get('http://%s/%s/anim?enable=1' % (self.ip,self.base_url))
+            print(resp.text)
+        except:
+            pass
         
     def disableAnim(self):
-        resp=requests.get('http://%s/%s/anim?enable=0' % (self.ip,self.base_url))
-        print(resp.text)
+        try:
+            resp=requests.get('http://%s/%s/anim?enable=0' % (self.ip,self.base_url))
+            print(resp.text)
+        except:
+            pass
         
     def clrAll(self):
         self.sendCmd(1,self.nbre_leds,ArdLeds.OFF)
@@ -113,44 +137,59 @@ def log(msg):
 
 
 def tick_minute(hour,minute):
+    global prev_missing
     #log('Tick %d:%d' % (hour,minute) )
 
-    try:
-        ledsCabaneBas.getWdg()
-    except Exception as e:
-        log('[ERREUR] - getWdg Cabane !')
-    
-    try:
-        ledsTour.getWdg()
-    except Exception as e:
-        log('[ERREUR] - getWdg Cabane !')
+    isBasOk=ledsCabaneBas.getWdg()
+    isHautOk=ledsCabaneHaut.getWdg()
+    isTourOk=ledsTour.getWdg()
 
+    missing=[]
+    if isBasOk==False:
+        missing.append('Bas')
+    if isHautOk==False:
+        missing.append('Haut')
+    if isTourOk==False:
+        missing.append('Tour')
+
+    if len(missing)>0 and prev_missing!=missing:
+        log('[ERREUR] - Au moins un équipement ne répond pas: %s' % (missing))
+    elif prev_missing!=missing:
+        log('Tous les équipements répondent de nouveau')
+
+    prev_missing=missing
+        
    
     if (hour==6) and (minute==0):
         log('Debut animation du matin')
+        
         ledsCabaneBas.disableAnim()
         ledsCabaneHaut.disableAnim()
-        ledsTour.disableAnim()        
+        ledsTour.disableAnim()
+        
         ledsCabaneBas.clrAll()
         ledsCabaneHaut.clrAll()
         ledsTour.setAll('b')
     elif (hour==6) and (minute==30):
         ledsCabaneBas.disableAnim()
-        ledsCabaneHaut.disableAnim()
-        ledsTour.disableAnim()        
+        ledsCabaneHaut.disableAnim()        
+        ledsTour.disableAnim()
+        
         ledsCabaneBas.clrAll()
         ledsCabaneHaut.setAll('b')
         ledsTour.setAll('b')
     elif (hour==7) and (minute==0):
         ledsCabaneBas.disableAnim()
         ledsCabaneHaut.disableAnim()
-        ledsTour.disableAnim()        
+        ledsTour.disableAnim()
+        
         ledsCabaneBas.setAll('r')
         ledsCabaneHaut.setAll('g')
         ledsTour.setAnim(PROG_INITIAL_TOUR)
     elif (hour==7) and (minute>0) and (minute<15):
         ledsCabaneBas.disableAnim()
         ledsCabaneHaut.disableAnim()
+        
         ledsCabaneBas.setAll('r')
         if (minute % 2) == 0:            
             ledsCabaneHaut.setAll('b')
@@ -159,6 +198,7 @@ def tick_minute(hour,minute):
     elif (hour==7) and (minute>15) and (minute<30):
         ledsCabaneBas.disableAnim()
         ledsCabaneHaut.disableAnim()
+        
         ledsCabaneBas.setAll('b')        
         if (minute % 2) == 0:
             ledsCabaneHaut.setAll('g')
@@ -194,7 +234,7 @@ def tick_minute(hour,minute):
         ledsCabaneHaut.clrAll()
         ledsTour.clrAll()
     elif (hour==17) and (minute==0):
-        log('Debut animation du soir')        
+        log('Debut animation du soir')
         ledsCabaneBas.disableAnim()
         ledsCabaneHaut.disableAnim()
         ledsTour.disableAnim()
