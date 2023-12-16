@@ -1,7 +1,7 @@
 import requests
 
-IP_TOUR='192.168.2.130'
-IP_CABANE='192.168.2.155'
+IP_TOUR='192.168.3.10'
+IP_CABANE='192.168.3.11'
 
 
 def test_tour():
@@ -33,14 +33,15 @@ def test_tour():
 
 def init_tour():
 
-    cmd_prog='S26E33LrOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LgOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LbOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOW*'
+    #cmd_prog='S26E33LrOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LgOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LbOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOW*'
     #cmd_prog='X50ZS1LgOWCS2OWCS3OWCS4OWCS5OWCS6OWCS7OWCS8OWCS9OWCS10OWCS11OWCS12OWCS13OWCS14OWCS15OWCS16OWCS17OWCS18OWCS19OWCS20OWCS21OWC*'
     #cmd_prog='S26E33LrOS1E23X800LgOWLrOWLbOWLgOWLrOWLbOWX800CS26E33LgOS1E23WX100LgOWLrOWLbOWLgOWLrOWLbOWLgOWLrOWLbOWLgOWLrOWLbOWX1000ZW*'
+    cmd_prog='S26E33LrOX100S0E5OWCS6E12OWCS13E18OWCS19E25OWCS26E33LbOS0E5OWCS6E12OWCS13E18OWCS19E25OWCS26E33LgOS0E5OWCS6E12OWCS13E18OWCS19E25OWC*'
 
     resp=requests.get('http://%s/leds/wdg' % IP_TOUR)
     print(resp.text)
 
-    resp=requests.get('http://%s/leds/wdg?delay=18000' % IP_TOUR)
+    resp=requests.get('http://%s/leds/wdg?delay=%d' % (IP_TOUR,3600*5))
     print(resp.text)
 
     resp=requests.get('http://%s/leds/anim?enable=0' % IP_TOUR)
@@ -97,7 +98,7 @@ def read_cabane():
 #clear_all() 
 
 init_tour()  
-#init_cabane()
+init_cabane()
 
 #read_cabane()
 #disable_wdg()

@@ -65,7 +65,7 @@ class GrpLd:
         
 NUM_LEDS=34
 
-lds=BdLeds(NUM_LEDS,"192.168.1.42");
+lds=BdLeds(NUM_LEDS,"192.168.3.10");
 print(lds.get_info());
 
 lds.setAllLeds((0,0,0));

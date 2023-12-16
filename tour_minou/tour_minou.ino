@@ -12,7 +12,8 @@
 
 #include <Wire.h>
 //#define FASTLED_ESP8266_D1_PIN_ORDER
-#include "FastLED.h"
+#define FASTLED_ESP8266_NODEMCU_PIN_ORDER
+#include <FastLED.h>
 #include "ldanim.h"
 
 #include "credentials.h"
@@ -449,6 +450,7 @@ void handleWdg()
 {
   if (server.args()==0)
   {
+    g_t0_ms=millis();
     server.send(200, "text/plain", "WDG OK");
     return;
   }
