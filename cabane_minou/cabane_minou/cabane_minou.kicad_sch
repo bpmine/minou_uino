@@ -1,0 +1,92 @@
+(kicad_sch (version 20230121) (generator eeschema)
+
+  (uuid 11e62a2f-8df1-4cb5-ab57-f2733cc2df79)
+
+  (paper "A4")
+
+  (title_block
+    (title "Cabane à Minou")
+    (rev "B0")
+    (company "BPC")
+    (comment 1 "2 capteurs de température / 3 entrées détecteur de mouvement")
+    (comment 2 "Wifi / Luminosité / RTC")
+    (comment 3 "4 sorties Strip LEDs (Avec Alim. 5V pilotable)")
+    (comment 4 "Alimentation 12V / 1 sortie 12V commutable")
+  )
+
+  (lib_symbols
+  )
+
+
+  (sheet (at 67.31 64.77) (size 44.45 68.58) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 066caea8-1cca-4951-88e6-585ab5053db4)
+    (property "Sheetname" "es" (at 67.31 64.0584 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "es.kicad_sch" (at 67.31 133.9346 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "cabane_minou2"
+        (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79" (page "3"))
+      )
+    )
+  )
+
+  (sheet (at 67.31 38.1) (size 172.72 20.32) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 5dbc7775-50ea-4fbb-95fe-87fffe8eb81e)
+    (property "Sheetname" "power" (at 67.31 37.3884 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "power.kicad_sch" (at 67.31 59.0046 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "cabane_minou2"
+        (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79" (page "1"))
+      )
+    )
+  )
+
+  (sheet (at 208.28 64.77) (size 31.75 68.58) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 5f7f5cba-352a-4f2e-ab5b-949b420c2919)
+    (property "Sheetname" "stripleds" (at 208.28 64.0584 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "stripleds.kicad_sch" (at 208.28 133.9346 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "cabane_minou2"
+        (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79" (page "5"))
+      )
+    )
+  )
+
+  (sheet (at 120.65 64.77) (size 78.74 68.58) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid ec6d8a6b-2462-4c59-8b6f-d659ae602474)
+    (property "Sheetname" "cpu" (at 120.65 64.0584 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "cpu.kicad_sch" (at 120.65 133.9346 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "cabane_minou2"
+        (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79" (page "2"))
+      )
+    )
+  )
+
+  (sheet_instances
+    (path "/" (page "1"))
+  )
+)
