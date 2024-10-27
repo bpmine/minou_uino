@@ -2227,7 +2227,7 @@
     )
     (pin "1" (uuid 55233a96-bd2a-4d9d-b34f-82990805fdcb))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "#PWR?") (unit 1)
         )
@@ -2255,7 +2255,7 @@
     )
     (pin "1" (uuid 07c966d3-24c2-4595-be52-da790747d36f))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "#PWR025") (unit 1)
         )
@@ -2285,7 +2285,7 @@
     )
     (pin "1" (uuid 619d9ab1-e4c7-43d6-b9aa-77ff2f58a7b4))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "#PWR?") (unit 1)
         )
@@ -2316,7 +2316,7 @@
     (pin "3" (uuid a5cfe206-cb72-4821-8416-5a927f3076a6))
     (pin "4" (uuid 639e40b0-0826-4427-868e-ee0d50335b7e))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "J2") (unit 1)
         )
@@ -2345,7 +2345,7 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "X?") (unit 1)
         )
@@ -2373,7 +2373,7 @@
     )
     (pin "1" (uuid 3d2a8f77-e524-4944-b8fe-74f06c144f20))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "#PWR?") (unit 1)
         )
@@ -2401,7 +2401,7 @@
     )
     (pin "1" (uuid ff52e6db-52a9-4bba-97a1-6205cf95289f))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "#PWR?") (unit 1)
         )
@@ -2430,7 +2430,7 @@
     (pin "1" (uuid 65df187d-5779-454f-bbbb-8b5ad2154ba8))
     (pin "2" (uuid 8469d9cb-d17b-46b4-8dfd-ee7ea6980d73))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "C?") (unit 1)
         )
@@ -2459,7 +2459,7 @@
     (pin "1" (uuid 64ae5033-e156-48ab-8baf-8a2cf03521ca))
     (pin "2" (uuid c44aae13-19f1-455e-bbdf-2cccce0fa702))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "C?") (unit 1)
         )
@@ -2494,7 +2494,7 @@
     (pin "1" (uuid ef4525e9-8669-477d-bb46-59d0b995b6ff))
     (pin "2" (uuid 0571222f-290e-48fd-a482-7d3bce381016))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "D?") (unit 1)
         )
@@ -2522,7 +2522,7 @@
     )
     (pin "1" (uuid 72f81f87-8c86-4589-afbd-e725f5582917))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "#PWR026") (unit 1)
         )
@@ -2552,7 +2552,7 @@
     )
     (pin "1" (uuid d6a180b0-4d45-414b-b170-6dbcc10816c1))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "#PWR032") (unit 1)
         )
@@ -2583,7 +2583,7 @@
     (pin "1" (uuid 6445ce1f-a767-4de5-b3b5-50f21d7256b3))
     (pin "2" (uuid 7d0d4ef3-e0fb-4ab9-a452-6271e9311249))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "R?") (unit 1)
         )
@@ -2614,7 +2614,7 @@
     (pin "3" (uuid a63dd1b4-454e-4364-ad8c-7091712c1f8d))
     (pin "4" (uuid d56054e3-9476-49d6-a43c-043cb1527f49))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "J3") (unit 1)
         )
@@ -2644,7 +2644,7 @@
     )
     (pin "1" (uuid a925e92c-0d20-4ef3-9029-74b00080f4d6))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "#PWR023") (unit 1)
         )
@@ -2674,7 +2674,7 @@
     )
     (pin "1" (uuid e87d9557-e3e8-4e34-b1de-65ebe5d1f2df))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "#PWR027") (unit 1)
         )
@@ -2707,7 +2707,7 @@
     )
     (pin "1" (uuid abee9bb5-523c-4b11-adea-9c482022802f))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "#PWR035") (unit 1)
         )
@@ -2737,7 +2737,7 @@
     )
     (pin "1" (uuid eab7a2b3-74b4-4f49-a1bb-01fff36a73b3))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "#PWR?") (unit 1)
         )
@@ -2765,7 +2765,7 @@
     )
     (pin "1" (uuid e80bb01e-3c07-461b-b931-05bbe92160e0))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "#PWR?") (unit 1)
         )
@@ -2794,7 +2794,7 @@
     (pin "1" (uuid fff5f7fa-dc22-454b-a6b5-9dd12b045056))
     (pin "2" (uuid 94335802-e6da-4798-a736-c77bdc19cee9))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "R?") (unit 1)
         )
@@ -2822,7 +2822,7 @@
     )
     (pin "1" (uuid bc696fd9-8d8c-4c9f-8b1e-953fa31c25bd))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "#PWR?") (unit 1)
         )
@@ -2851,7 +2851,7 @@
     (pin "1" (uuid 6ae0ef20-3d6a-4f06-84e2-39038efcebe2))
     (pin "2" (uuid e551172d-c124-428d-8bc0-11eadcddce08))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "C13") (unit 1)
         )
@@ -2884,7 +2884,7 @@
     )
     (pin "1" (uuid a3f56d26-a97b-4569-a38e-c62b45553c76))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "#PWR037") (unit 1)
         )
@@ -2925,7 +2925,7 @@
     (pin "8" (uuid 7088bcb8-c2b7-4838-b88a-5384c874a89a))
     (pin "9" (uuid 1f694792-7e24-41a4-b63d-dd2177ce6724))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "U7") (unit 1)
         )
@@ -2951,7 +2951,7 @@
     (pin "1" (uuid 2b3d85e9-3a01-49a3-a0f7-01e1c024c585))
     (pin "2" (uuid d8314d9d-00ec-4da2-b7e2-fc19b411608b))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "C?") (unit 1)
         )
@@ -2980,7 +2980,7 @@
     (pin "1" (uuid 81443c18-5d9c-4f72-a4a5-bfceec1a6388))
     (pin "2" (uuid 8dc55c91-f0ea-4a88-9acd-e30ba2a93a69))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "C10") (unit 1)
         )
@@ -3017,7 +3017,7 @@
     (pin "1" (uuid 11edab83-ec23-4525-972b-0fa321adaa90))
     (pin "2" (uuid 9d7f5493-16cb-4235-9bcc-839d21445114))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "C?") (unit 1)
         )
@@ -3045,7 +3045,7 @@
     )
     (pin "1" (uuid a99955a1-a29c-4b34-8fa6-96e9b3b392eb))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "#PWR?") (unit 1)
         )
@@ -3073,7 +3073,7 @@
     )
     (pin "1" (uuid 8a3e8269-2a6e-4bd0-9af1-af01dcdc398c))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "#PWR?") (unit 1)
         )
@@ -3101,7 +3101,7 @@
     )
     (pin "1" (uuid 0378ad95-1e70-4240-b533-2fd12c67dddf))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "#PWR?") (unit 1)
         )
@@ -3148,7 +3148,7 @@
     (pin "7" (uuid de9f01e0-89c3-496f-badc-59722b0a5446))
     (pin "8" (uuid 7a680765-c906-456a-9bc9-c01689467ac5))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "U?") (unit 1)
         )
@@ -3176,7 +3176,7 @@
     )
     (pin "1" (uuid dcb88a95-4201-4dc6-8152-5e90c0283833))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "#PWR?") (unit 1)
         )
@@ -3301,7 +3301,7 @@
     (pin "VIN_1" (uuid 8be24bd3-8e76-4cbf-b1ea-13b1a6ef8846))
     (pin "VIN_2" (uuid 25da3bfb-9c24-4f95-b238-faabfd4ea846))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "U3") (unit 1)
         )
@@ -3331,7 +3331,7 @@
     (pin "5" (uuid ca50b969-075c-43b5-ac7a-94cfd65274d1))
     (pin "6" (uuid b522366d-da71-44f8-9403-484d4c1efaa9))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "U4") (unit 1)
         )
@@ -3355,7 +3355,7 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "X?") (unit 1)
         )
@@ -3388,7 +3388,7 @@
     (pin "5" (uuid c827e586-2ed4-47b4-be40-c5d10d07b589))
     (pin "6" (uuid 4e697a44-e0fa-4302-a1de-233d5a4ce2cb))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "U?") (unit 1)
         )
@@ -3416,7 +3416,7 @@
     )
     (pin "1" (uuid 286de60c-ecac-4826-9941-d723f5d7346a))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "#PWR024") (unit 1)
         )
@@ -3449,7 +3449,7 @@
     )
     (pin "1" (uuid a77716e6-1516-49b1-b37a-78b40afe2aa2))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "#PWR?") (unit 1)
         )
@@ -3476,7 +3476,7 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "X?") (unit 1)
         )
@@ -3505,7 +3505,7 @@
     (pin "1" (uuid b4ffb4a2-5d82-42af-bf92-2eb96b57f185))
     (pin "2" (uuid 23ca02c6-5090-4f7b-be3e-4cee2c2fb9ad))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "R?") (unit 1)
         )
@@ -3534,7 +3534,7 @@
     (pin "1" (uuid 7986d3a8-37f8-4c51-8b26-1dd8cb91b476))
     (pin "2" (uuid b7434351-c748-4d08-a565-68523fed58f7))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "C?") (unit 1)
         )
@@ -3562,7 +3562,7 @@
     )
     (pin "1" (uuid e1359ff8-79dd-42f6-b60e-a70e8882a69b))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "#FLG03") (unit 1)
         )
@@ -3588,7 +3588,7 @@
     (pin "1" (uuid 59f35afb-3f5a-4ebc-bedb-58e4dd11ebb1))
     (pin "2" (uuid 19ab5cc8-3e98-433f-8631-500e7e1b2b66))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "C9") (unit 1)
         )
@@ -3622,7 +3622,7 @@
     (pin "1" (uuid c929b357-823e-43c5-bdff-837d30a4fb55))
     (pin "2" (uuid 4ed45027-f322-4afd-9248-5192d04ae85d))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "C?") (unit 1)
         )
@@ -3651,7 +3651,7 @@
     (pin "1" (uuid e9b0c6e4-5c87-41e5-b5a0-65a8da8ee6da))
     (pin "2" (uuid 33e5d2a1-85f2-49e0-9612-c1cccf288c7a))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "C14") (unit 1)
         )
@@ -3688,7 +3688,7 @@
     (pin "1" (uuid 301b1233-936e-439c-9ea2-27115470793d))
     (pin "2" (uuid 9e13ca75-f924-4827-8388-416411d0b626))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "R?") (unit 1)
         )
@@ -3715,7 +3715,7 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "X?") (unit 1)
         )
@@ -3743,7 +3743,7 @@
     )
     (pin "1" (uuid bf1ed36f-60b6-4de8-89de-64eedf0cff41))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79"
           (reference "#PWR?") (unit 1)
         )
@@ -3771,7 +3771,7 @@
     )
     (pin "1" (uuid 79e9acc3-d088-4f87-847e-1992088dd024))
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79/ec6d8a6b-2462-4c59-8b6f-d659ae602474"
           (reference "#PWR028") (unit 1)
         )

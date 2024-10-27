@@ -5,6 +5,12 @@
   )
 
   (paper "A4")
+  (title_block
+    (title "Cabane de Minou")
+    (date "2024-10-27")
+    (rev "Rev C0")
+  )
+
   (layers
     (0 "F.Cu" signal)
     (31 "B.Cu" signal)

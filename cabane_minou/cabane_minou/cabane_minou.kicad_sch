@@ -6,7 +6,8 @@
 
   (title_block
     (title "Cabane à Minou")
-    (rev "B0")
+    (date "2024-10-27")
+    (rev "C0")
     (company "BPC")
     (comment 1 "2 capteurs de température / 3 entrées détecteur de mouvement")
     (comment 2 "Wifi / Luminosité / RTC")
@@ -29,7 +30,7 @@
       (effects (font (size 1.27 1.27)) (justify left top))
     )
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79" (page "3"))
       )
     )
@@ -46,7 +47,7 @@
       (effects (font (size 1.27 1.27)) (justify left top))
     )
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79" (page "1"))
       )
     )
@@ -63,7 +64,7 @@
       (effects (font (size 1.27 1.27)) (justify left top))
     )
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79" (page "5"))
       )
     )
@@ -80,7 +81,7 @@
       (effects (font (size 1.27 1.27)) (justify left top))
     )
     (instances
-      (project "cabane_minou2"
+      (project "cabane_minou"
         (path "/11e62a2f-8df1-4cb5-ab57-f2733cc2df79" (page "2"))
       )
     )
