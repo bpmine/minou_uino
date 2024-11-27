@@ -11651,7 +11651,7 @@
   (gr_text "Rx" (at 170.72 35.02) (layer "F.SilkS") (tstamp eed2ce10-c41b-4637-8273-0bdb5cc42231)
     (effects (font (size 1 1) (thickness 0.15)) (justify left bottom))
   )
-  (gr_text_box "Carte de contrôle\nCabane de Minou\n23/11/2024\nRev A0"
+  (gr_text_box "Carte de contrôle\nCabane de Minou\n23/11/2024\nRev C0"
     (start 121.625 100.56) (end 138.435 108.82) (layer "F.SilkS") (tstamp c5909326-2f13-48b2-ab62-d64240d797ef)
       (effects (font (size 1 1) (thickness 0.15)) (justify left top))
     (stroke (width 0.12) (type solid))  )
