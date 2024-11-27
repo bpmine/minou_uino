@@ -6,12 +6,14 @@
 
   (title_block
     (title "Cabane à Minou")
-    (rev "B0")
+    (date "2024-11-27")
+    (rev "Rev C0")
     (company "BPC")
-    (comment 1 "2 capteurs de température / 3 entrées détecteur de mouvement")
-    (comment 2 "Wifi / Luminosité / RTC")
+    (comment 1 "2 capteurs de température / 4 entrées détecteur de mouvement")
+    (comment 2 "Wifi / Luminosité / RTC / Bluetooth / Lcd")
     (comment 3 "4 sorties Strip LEDs (Avec Alim. 5V pilotable)")
     (comment 4 "Alimentation 12V / 1 sortie 12V commutable")
+    (comment 5 "Alimentation 12V / 1 sortie 12V commutable")
   )
 
   (lib_symbols
@@ -2982,7 +2984,7 @@
     (property "Value" "Bas" (at 52.832 152.154 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_PT-1,5-5-3.5-H_1x05_P3.50mm_Horizontal" (at 50.8 149.86 0)
+    (property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_PT-1,5-6-3.5-H_1x06_P3.50mm_Horizontal" (at 50.8 149.86 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (at 50.8 149.86 0)

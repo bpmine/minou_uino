@@ -6,11 +6,11 @@
 
   (title_block
     (title "Cabane à Minou")
-    (date "2024-10-27")
-    (rev "C0")
+    (date "2024-11-27")
+    (rev "Rev C0")
     (company "BPC")
-    (comment 1 "2 capteurs de température / 3 entrées détecteur de mouvement")
-    (comment 2 "Wifi / Luminosité / RTC")
+    (comment 1 "2 capteurs de température / 4 entrées détecteur de mouvement")
+    (comment 2 "Wifi / Luminosité / RTC / Bluetooth / Lcd")
     (comment 3 "4 sorties Strip LEDs (Avec Alim. 5V pilotable)")
     (comment 4 "Alimentation 12V / 1 sortie 12V commutable")
   )
