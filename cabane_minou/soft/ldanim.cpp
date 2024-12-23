@@ -7,7 +7,7 @@
 #include "ldanim.h"
 
 #ifndef WIN32
-    #include "FastLED.h"    
+    //#include "FastLED.h"    
     #include <arduino.h>
 #endif
 
@@ -46,42 +46,12 @@
 #endif
 
 /**
-* @brief Constructeur
-*/
-LdAnim::LdAnim()
-{
-    m_pProg = NULL;
-    m_pPos = NULL;
-    m_instr = 0;
-    m_delay_ms = 1000;
-    m_tick0_ms = millis();
-    m_r = 127;
-    m_g = 0;
-    m_b = 0;
-    m_iProgLen = 0;
-    m_start = 0;
-    m_end = 0;
-    m_leds=NULL;
-    m_nbLeds=0;
-}
-
-/**
-* @brief Configure LEDs
-* @param leds Tableau avec les LEDs (CRGB *)
-* @param nbLeds Nombre de LEDs
-*/
-void LdAnim::setLeds(void* leds, int nbLeds)
-{
-    m_leds = leds;
-    m_nbLeds = nbLeds;
-}
-
-/**
  * @brief Indique si le caractere est un nombre
  * @param c Caractere
  * @return true si c'est un numero
 */
-bool LdAnim::isNumDigit(char c)
+template <int PIN_DATA,int POW_5V, int NBRE>
+bool LdAnim<PIN_DATA,POW_5V,NBRE>::isNumDigit(char c)
 {
     if ((c >= '0') && (c <= '9'))
     {
@@ -98,7 +68,8 @@ bool LdAnim::isNumDigit(char c)
  * @param i_pint Nombre retourne
  * @return true si un nombre a bien ete decode
 */
-bool LdAnim::decodeNum(int* i_pint)
+template <int PIN_DATA,int POW_5V, int NBRE>
+bool LdAnim<PIN_DATA,POW_5V,NBRE>::decodeNum(int* i_pint)
 {
     char* pDec = m_pPos;
     while (isNumDigit(*pDec) == true)
@@ -131,11 +102,12 @@ bool LdAnim::decodeNum(int* i_pint)
  * @param g Composante verte (0-127)
  * @param b Composante bleue (0-127)
 */
-void LdAnim::setLed(char inx, char r, char g, char b)
+template <int PIN_DATA,int POW_5V, int NBRE>
+void LdAnim<PIN_DATA,POW_5V,NBRE>::setLed(char inx, char r, char g, char b)
 {
 #ifndef WIN32
-    CRGB* pLeds = (CRGB*)m_leds;
-    pLeds[inx] = CRGB(r, g, b);
+    //CRGB* pLeds = (CRGB*)leds;
+    //leds[inx] = CRGB(r, g, b);
 #else
 
 #endif
@@ -144,7 +116,8 @@ void LdAnim::setLed(char inx, char r, char g, char b)
 /**
  * @brief Log de l'etape en cours sur port serie (ou printf si WIN32)
 */
-void LdAnim::logStep()
+template <int PIN_DATA,int POW_5V, int NBRE>
+void LdAnim<PIN_DATA,POW_5V,NBRE>::logStep()
 {
     char strMsg[30];
 
@@ -170,7 +143,8 @@ void LdAnim::logStep()
  * @param strOut Buffer de sortie (chaine)
  * @param maxLen Taille allouee pour le buffer
 */
-void LdAnim::getDumpStr(char* strOut, int maxLen)
+template <int PIN_DATA,int POW_5V, int NBRE>
+void LdAnim<PIN_DATA,POW_5V,NBRE>::getDumpStr(char* strOut, int maxLen)
 {
     char strMsg[30];
 
@@ -191,7 +165,8 @@ void LdAnim::getDumpStr(char* strOut, int maxLen)
 /**
  * @brief Decode l'instruction a l'emplacement courant
 */
-void LdAnim::decode()
+template <int PIN_DATA,int POW_5V, int NBRE>
+void LdAnim<PIN_DATA,POW_5V,NBRE>::decode()
 {
     if (m_pPos == NULL)
         return;
@@ -219,102 +194,102 @@ void LdAnim::decode()
     switch (m_instr)
     {
       /// Pour le start, on memorise l'index de LED a la fois pour start et end
-    case INSTR_START:
-    {
-        int num;
-        if (decodeNum(&num) == true)
-        {
-            if ((num >= 0) && (num < m_nbLeds))
-            {
-                m_start = num;
-                m_end = num;
-            }
-        }
-        break;
-    }
-    /// Pour le end, on memorise seulement le end
-    case INSTR_END:
-    {
-        int num;
-        if (decodeNum(&num) == true)
-        {
-            if ((num >= 0) && (num < m_nbLeds))
-            {
-                m_end = num;
-            }
-        }
-        break;
-    }
-    /// On momorise la couleur (les composantes en fonction du raccourci donne)
-    case INSTR_SETCOL:
-    {
-        char col = (*m_pPos);
-        m_pPos++;
-
-        switch (col)
-        {
-          case 'r':m_r = 127; m_g = 0; m_b = 0; break;
-          case 'g':m_r = 0; m_g = 127; m_b = 0; break;
-          case 'b':m_r = 0; m_g = 0; m_b = 127; break;
-          case 'w':m_r = 127; m_g = 127; m_b = 127; break;
-          case 'y':m_r = 127; m_g = 127; m_b = 0; break;
-          case 'o':m_r = 127; m_g = 82; m_b = 0; break;
-          case 'p':m_r = 127; m_g = 9; m_b = 73; break;
-          case 'c':m_r = 0; m_g = 127; m_b = 127; break;
-          case 'v':m_r = 127; m_g = 0; m_b = 127; break;
-        }
-
-        break;
-    }
-    /// Memorisation de la composante Rouge
-    case INSTR_SETR:
-    {
-        int num = 0;
-        if (decodeNum(&num) == true)
-            m_r = num;
-
-        break;
-    }
-    /// Memorisation de la composante Verte
-    case INSTR_SETG:
-    {
-        int num = 0;
-        if (decodeNum(&num) == true)
-            m_g = num;
-
-        break;
-    }
-    /// Memorisation de la composante Bleue
-    case INSTR_SETB:
-    {
-        int num = 0;
-        if (decodeNum(&num) == true)
-            m_b = num;
-
-        break;
-    }
-    /// Memorisation du delai demande (exprime en secondes)
-    case INSTR_DELAY_S:
-    {
-        int num = 0;
-        if (decodeNum(&num) == true)
-            m_delay_ms = num * 1000L;
-        break;
-    }
-    /// Memorisation du delai demande (exprime en millis)
-    case INSTR_DEL_MS:
-    {
-        int num = 0;
-        if (decodeNum(&num) == true)
-            m_delay_ms = num;
-        break;
-    }
-    /// Debut de l'attente: On prend la valeur courante du tick en ms
-    case INSTR_WAIT:
-    {
-        m_tick0_ms = millis();
-        break;
-    }
+      case INSTR_START:
+      {
+          int num;
+          if (decodeNum(&num) == true)
+          {
+              if ((num >= 0) && (num < NBRE))
+              {
+                  m_start = num;
+                  m_end = num;
+              }
+          }
+          break;
+      }
+      /// Pour le end, on memorise seulement le end
+      case INSTR_END:
+      {
+          int num;
+          if (decodeNum(&num) == true)
+          {
+              if ((num >= 0) && (num < NBRE))
+              {
+                  m_end = num;
+              }
+          }
+          break;
+      }
+      /// On momorise la couleur (les composantes en fonction du raccourci donne)
+      case INSTR_SETCOL:
+      {
+          char col = (*m_pPos);
+          m_pPos++;
+  
+          switch (col)
+          {
+            case 'r':m_r = 127; m_g = 0; m_b = 0; break;
+            case 'g':m_r = 0; m_g = 127; m_b = 0; break;
+            case 'b':m_r = 0; m_g = 0; m_b = 127; break;
+            case 'w':m_r = 127; m_g = 127; m_b = 127; break;
+            case 'y':m_r = 127; m_g = 127; m_b = 0; break;
+            case 'o':m_r = 127; m_g = 82; m_b = 0; break;
+            case 'p':m_r = 127; m_g = 9; m_b = 73; break;
+            case 'c':m_r = 0; m_g = 127; m_b = 127; break;
+            case 'v':m_r = 127; m_g = 0; m_b = 127; break;
+          }
+  
+          break;
+      }
+      /// Memorisation de la composante Rouge
+      case INSTR_SETR:
+      {
+          int num = 0;
+          if (decodeNum(&num) == true)
+              m_r = num;
+  
+          break;
+      }
+      /// Memorisation de la composante Verte
+      case INSTR_SETG:
+      {
+          int num = 0;
+          if (decodeNum(&num) == true)
+              m_g = num;
+  
+          break;
+      }
+      /// Memorisation de la composante Bleue
+      case INSTR_SETB:
+      {
+          int num = 0;
+          if (decodeNum(&num) == true)
+              m_b = num;
+  
+          break;
+      }
+      /// Memorisation du delai demande (exprime en secondes)
+      case INSTR_DELAY_S:
+      {
+          int num = 0;
+          if (decodeNum(&num) == true)
+              m_delay_ms = num * 1000L;
+          break;
+      }
+      /// Memorisation du delai demande (exprime en millis)
+      case INSTR_DEL_MS:
+      {
+          int num = 0;
+          if (decodeNum(&num) == true)
+              m_delay_ms = num;
+          break;
+      }
+      /// Debut de l'attente: On prend la valeur courante du tick en ms
+      case INSTR_WAIT:
+      {
+          m_tick0_ms = millis();
+          break;
+      }
     }
 }
 
@@ -323,19 +298,22 @@ void LdAnim::decode()
  * @param prog Programme a executer
  * @param len Taille en octets du programme
 */
-void LdAnim::init(char* prog, int len)
+template <int PIN_DATA,int POW_5V, int NBRE>
+void LdAnim<PIN_DATA,POW_5V,NBRE>::init(char* prog, int len)
 {
-    m_pProg = prog;
-    m_pPos = prog;
-    m_iProgLen = len;
+  m_tick0_ms = millis();
+  m_pProg = prog;
+  m_pPos = prog;
+  m_iProgLen = len;
 
-    fetch_next();
+  fetch_next();
 }
 
 /**
 * @brief Recupere la prochaine instruction et la decode
 */
-void LdAnim::fetch_next(void)
+template <int PIN_DATA,int POW_5V, int NBRE>
+void LdAnim<PIN_DATA,POW_5V,NBRE>::fetch_next(void)
 {
     if (m_pPos - m_pProg < m_iProgLen)
     {
@@ -348,8 +326,12 @@ void LdAnim::fetch_next(void)
  * 
  * Gere la condition de passage a l'instruction suivante
 */
-void LdAnim::tick(void)
+template <int PIN_DATA,int POW_5V, int NBRE>
+void LdAnim<PIN_DATA,POW_5V,NBRE>::tick(void)
 {
+  if (m_running==false)
+    return;
+    
     switch (m_instr)
     {
     case INSTR_NOP:
@@ -370,7 +352,7 @@ void LdAnim::tick(void)
     /// Toutes les LEDs eteintes puis suivant
     case INSTR_CLRALL:
     {
-        for (int i = 0; i < m_nbLeds; i++)
+        for (int i = 0; i < NBRE; i++)
         {
             setLed(i, 0, 0, 0);
         }
@@ -380,7 +362,7 @@ void LdAnim::tick(void)
     /// Toutes les LEDs allumees avec le RGB courant puis suivant
     case INSTR_SETALL:
     {
-        for (int i = 0; i < m_nbLeds; i++)
+        for (int i = 0; i < NBRE; i++)
         {
             setLed(i, m_r, m_g, m_b);
         }
@@ -439,4 +421,16 @@ void LdAnim::tick(void)
 #ifndef WIN32
     FastLED.show();
 #endif
+}
+
+template <int PIN_DATA,int POW_5V, int NBRE>
+void LdAnim<PIN_DATA,POW_5V,NBRE>::start(void)
+{
+  m_running=true;
+}
+
+template <int PIN_DATA,int POW_5V, int NBRE>
+void LdAnim<PIN_DATA,POW_5V,NBRE>::stop(void)
+{
+  m_running=false;
 }

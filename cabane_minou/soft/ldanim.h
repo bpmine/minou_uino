@@ -1,6 +1,8 @@
 #ifndef LDANIM_HEADER_INCLUDED
 #define LDANIM_HEADER_INCLUDED
 
+#include "ldstrip.hpp"
+
 /**
  * @file ldanim.h
  * 
@@ -9,11 +11,12 @@
  * On fourni une chaine avec un MACROPROGRAMME a cette classe
  * Elle gere le pilotage des LEDs et l'execution du programme
 */
-class LdAnim
+
+template <int PIN_DATA,int POW_5V, int NBRE>
+class LdAnim : public LdStrip<PIN_DATA,POW_5V,NBRE>
 {
 private:
-    void* m_leds;     ///< Tableau des LEDs
-    int m_nbLeds;     ///< Nombre de LEDs
+    bool m_running;
     char* m_pProg;    ///< Chaine du programme MACRO LANGAGE
     int m_iProgLen;   ///< Taille du programme
 
@@ -37,12 +40,28 @@ private:
 
     void logStep();
 
-public:
-    LdAnim();
-    void setLeds(void* leds, int nbLeds);
+public:    
+    LdAnim()
+    {
+      m_pProg = NULL;
+      m_pPos = NULL;
+      m_instr = 0;
+      m_delay_ms = 1000;
+      m_tick0_ms = 0;
+      m_r = 127;
+      m_g = 0;
+      m_b = 0;
+      m_iProgLen = 0;
+      m_start = 0;
+      m_end = 0;   
+      m_running=false;   
+    }
 
     void init(char* prog, int len);
     void tick(void);
+
+    void start(void);
+    void stop(void);
 
     void getDumpStr(char* strOut, int maxLen);
 };
