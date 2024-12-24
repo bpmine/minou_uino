@@ -16,6 +16,8 @@ class Move
     void begin(int pin);
     bool tick(void);
     void reset(void);
+
+    bool isStillMoving(void);
 };
 
 #endif

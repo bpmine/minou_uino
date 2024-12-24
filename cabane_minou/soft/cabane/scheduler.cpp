@@ -9,15 +9,10 @@ Scheduler::Scheduler()
 
 bool Scheduler::begin()
 {
-  ok=true; /// @todo a retirer qd ok
+  rtc.begin();
+  ok=true;
   
-  if (rtc.begin()==true)
-  {
-    ok=true;
-    return true;
-  }
-
-  return false;
+  return true ;
 }
 
 void Scheduler::setDateTime(DateTime &dte)
@@ -179,7 +174,7 @@ int Scheduler::getOffset(bool ete)
 DateTime Scheduler::nowLocal(void)
 {
   if (ok==false)
-    return DateTime(0,0,0,0,0,0);
+    return DateTime(0,0,0,12,0,0);
   
   DateTime utc=rtc.now();
   
@@ -193,7 +188,7 @@ DateTime Scheduler::nowLocal(void)
 DateTime Scheduler::nowUtc(void)
 {
   if (ok==false)
-    return DateTime(0,0,0,0,0,0);
+    return DateTime(0,0,0,12,0,0);
 
   DateTime utc=rtc.now();
   return utc;

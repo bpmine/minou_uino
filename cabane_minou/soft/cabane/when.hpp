@@ -5,6 +5,7 @@ class When
 {
   private:
     bool soiree;
+    bool matin;
     bool pile;
     bool demi;
     
@@ -12,16 +13,17 @@ class When
     When(DateTime &dte) 
     {
       soiree=false;
+      matin=false;
       pile=false;
       demi=false;
-      
-      if ( (dte.hour()>17) || (dte.hour()<2) )
+
+      if ( (dte.hour()>=17) || (dte.hour()<1) )
       {
         soiree=true;
       }
-      else
+      else if ( (dte.hour()>=6) && (dte.hour()<8) )
       {
-        soiree=false;
+        matin=true;
       }
   
       if ( dte.minute()==0)
@@ -40,13 +42,11 @@ class When
       else
       {
         demi=false;
-      }    
-
-      /// @todo A retirer
-      soiree=true;
+      }
     }
 
     bool isSoiree(void) {return soiree;}
+    bool isMatin(void) {return matin;}
     bool isPile(void) {return pile;}
     bool isDemi(void) {return demi;}
 };

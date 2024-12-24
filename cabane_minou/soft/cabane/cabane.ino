@@ -42,7 +42,7 @@ LdStrip<PIN_OUT_LEDS_RES, PIN_OUT_5V_LEDS_RES, NB_LEDS_TOUR> ldRes;
 */
 Timer tmrTemp(1000,false);
 Timer tmrRefresh(2000,false);
-Timer tmrPresence(20000,true);
+Timer tmrPresence(60000,true);
 Timer tmrOutOffBoot(4000,true);
 
 Scheduler scheduler;
@@ -207,7 +207,7 @@ void _aff_auto(void)
     ldTour.clrall();
     ldBas.setall(COL_GREEN);
   }
-  else if (w.isSoiree())
+  else if ( w.isSoiree() || w.isMatin() )
   {
     ldBas.pwron();
     ldHaut.pwron();
@@ -243,7 +243,7 @@ void _aff_auto(void)
       {
         ldBas.setall(COL_BLACK);
         ldHaut.setall(COL_BLACK);
-        ldTour.setall(COL_RED);
+        ldTour.setall(COL_GREEN);
       }
     }
   }
@@ -326,14 +326,8 @@ void loop()
   g_capot=(digitalRead(PIN_IN_CAPOT)==LOW)?false:true;
   g_veilleuse=g_capot;
 
-  if (moveBas.tick())
-  {
-    g_presence_bas=true;
-    g_presence_haut=false;
-    moveHaut.reset();
-    tmrPresence.start();
-  }  
-  
+  tmrOutOffBoot.tick();
+
   if (moveHaut.tick())
   {
     g_presence_haut=true;
@@ -342,14 +336,32 @@ void loop()
     tmrPresence.start();
   }
 
-  tmrOutOffBoot.tick();
+  if (moveBas.tick())
+  {
+    g_presence_bas=true;
+    g_presence_haut=false;
+    moveHaut.reset();
+    tmrPresence.start();
+  }  
   
+  /// On maintient la presence tant que le capteur est true
+  if (tmrPresence.isRunning())
+  {
+    if ( (g_presence_haut==true) && (moveHaut.isStillMoving()) )
+      tmrPresence.start();
+
+    if ( (g_presence_bas==true) && (moveBas.isStillMoving()) )
+      tmrPresence.start();
+  }
+  
+  /// On n'a plus de presence au bout du timer !
   if (tmrPresence.tick()==true)
   {
     g_presence_bas=false;
     g_presence_haut=false;
   }
   
+  /// Mesure periodique de la temperature/humidite
   if (tmrTemp.tick()==true)
   {
     digitalWrite(PIN_OUT_LED1,!digitalRead(PIN_OUT_LED1));

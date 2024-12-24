@@ -59,22 +59,23 @@ static void _OnOffAns(const char *strTitle,bool on)
 
 static void _term_exec_state()
 {
-  bool bas=api_strip_getpwr_bas();
+  /*bool bas=api_strip_getpwr_bas();
   bool haut=api_strip_getpwr_haut();
   bool tour=api_strip_getpwr_tour();
   bool res=api_strip_getpwr_res();
-  bool serial=api_strip_getpwr_serial();
+  bool serial=api_strip_getpwr_serial();*/
 
   Serial.println("Etat cabane:");
-  Serial.print("  - Strip bas    : ");Serial.println(bas);
+  /*Serial.print("  - Strip bas    : ");Serial.println(bas);
   Serial.print("  - Strip haut   : ");Serial.println(haut);
   Serial.print("  - Strip tour   : ");Serial.println(tour);
   Serial.print("  - Strip res    : ");Serial.println(res);
-  Serial.print("  - Strip serial : ");Serial.println(serial);
+  Serial.print("  - Strip serial : ");Serial.println(serial);*/
 
   DateTime dte=scheduler.nowLocal();
   When w(dte);
   Serial.print("  - Soiree       : ");Serial.println(w.isSoiree());
+  Serial.print("  - Matin        : ");Serial.println(w.isMatin());
   Serial.print("  - Pres. Haut   : ");Serial.println(g_presence_haut);
   Serial.print("  - Pres. Bas    : ");Serial.println(g_presence_bas);
   Serial.print("  - Pres. tour   : ");Serial.println(g_presence_tour);

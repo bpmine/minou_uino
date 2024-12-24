@@ -98,6 +98,11 @@ bool Move::tick(void)
     return false;
 }
 
+bool Move::isStillMoving(void)
+{
+  return digitalRead(m_pin)==HIGH?true:false;
+}
+
 void Move::reset(void)
 {
   if (m_pin==-1)
