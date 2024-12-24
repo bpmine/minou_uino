@@ -29,7 +29,7 @@ void Scheduler::setDateTime(DateTime &dte)
   Serial.println(toDateTimeStr(dte));
 
   int off=getOffset(isEte(dte));
-  Serial.print("Ofset: -");
+  Serial.print("Offset: -");
   Serial.println(off);
 
   DateTime dateHeureUTC (dte - TimeDelta(0,off,0,0));

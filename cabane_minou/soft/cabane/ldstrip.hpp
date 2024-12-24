@@ -7,6 +7,7 @@
 #define COL_RED       CRGB(255,0,0)
 #define COL_GREEN     CRGB(0,255,0)
 #define COL_BLUE      CRGB(0,0,255)
+#define COL_WHITE     CRGB(127,127,127)
 
 template <int PIN_DATA,int POW_5V, int NBRE>
 class LdStrip
@@ -46,6 +47,19 @@ class LdStrip
         else
           leds[i]=COL_GREEN;
       }      
+    }
+
+    /**
+     * @brief Pilote la LED
+     * @param inx Numero de LED
+     * @param r Composante rouge (0-127)
+     * @param g Composante verte (0-127)
+     * @param b Composante bleue (0-127)
+    */
+    void setLed(int inx, char r, char g, char b)
+    {
+      if ( (inx>0) && (inx<NBRE) )
+        leds[inx]=CRGB(r,g,b);
     }
 
     void clrall(void)

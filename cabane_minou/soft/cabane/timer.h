@@ -1,3 +1,6 @@
+#ifndef TIMER_HEADER_INCLUDED
+#define TIMER_HEADER_INCLUDED
+
 class Timer
 {
   private:
@@ -19,3 +22,6 @@ class Timer
     unsigned long getRemaining_ms(void);
     unsigned long getDuration_ms(void);
 };
+
+#endif
+

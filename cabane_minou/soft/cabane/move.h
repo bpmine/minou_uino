@@ -1,19 +1,21 @@
+#ifndef MOVE_HEADER_INCLUDED
+#define MOVE_HEADER_INCLUDED
+
 class Move
 {
   private:
-    int m_pin;
-    long m_cnt;  
-    
-    bool m_last_state;
-    bool m_falling;
+    int m_pin;    
+    int state;
+    unsigned long t0;
+
+    unsigned long delta(void);
   
   public:
-    Move(bool falling=false);
+    Move();
   
     void begin(int pin);
-
     bool tick(void);
     void reset(void);
-
-    long getCount(void);
 };
+
+#endif

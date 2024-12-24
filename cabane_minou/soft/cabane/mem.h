@@ -1,3 +1,6 @@
+#ifndef MEM_HEADER_INCLUDED
+#define MEM_HEADER_INCLUDED
+
 class Mem
 {
   private:
@@ -10,3 +13,5 @@ class Mem
     int getMode(void);
     void setMode(int mode);
 };
+
+#endif

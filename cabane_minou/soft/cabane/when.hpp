@@ -1,3 +1,6 @@
+#ifndef WHEN_HEADER_INCLUDED
+#define WHEN_HEADER_INCLUDED
+
 class When
 {
   private:
@@ -12,7 +15,7 @@ class When
       pile=false;
       demi=false;
       
-      if ( (dte.hour()>18) || (dte.hour()<1) )
+      if ( (dte.hour()>17) || (dte.hour()<2) )
       {
         soiree=true;
       }
@@ -39,10 +42,13 @@ class When
         demi=false;
       }    
 
-        soiree=true;
+      /// @todo A retirer
+      soiree=true;
     }
 
     bool isSoiree(void) {return soiree;}
     bool isPile(void) {return pile;}
     bool isDemi(void) {return demi;}
 };
+
+#endif

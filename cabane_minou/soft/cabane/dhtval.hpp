@@ -1,3 +1,8 @@
+#ifndef DHTVAL_HEADER_INCLUDED
+#define DHTVAL_HEADER_INCLUDED
+
+#include <arduino.h>
+
 class DhtVal
 {
   private:
@@ -5,7 +10,7 @@ class DhtVal
     int m_errs;
     
   public:
-    DhtVal() {}
+    DhtVal() : m_value(0),m_errs(0) {}
 
     void set(float val)
     {
@@ -31,4 +36,11 @@ class DhtVal
     {
       return m_value;
     }
+
+    void getStr(char *str)
+    {
+      dtostrf(get(),3,1,str);
+    }
 };
+
+#endif

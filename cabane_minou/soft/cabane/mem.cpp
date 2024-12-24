@@ -10,10 +10,7 @@ void Mem::load(void)
 
   if ((magic1==0xAA) && (magic2==0x55))
   {
-    if ( (val>=0) && (val<256) )
-      mode=val;
-    else
-      mode=0;
+    mode=val;
   }
   else
   {
@@ -26,7 +23,7 @@ void Mem::save(void)
 {
   EEPROM.write(0,0xAA);
   EEPROM.write(1,mode);
-  EEPROM.write(1,0x55);
+  EEPROM.write(2,0x55);
 }
 
 int Mem::getMode(void)
@@ -38,7 +35,7 @@ void Mem::setMode(int mode)
 {
   if ( (mode>=0) && (mode<256) )
   {
-    this->mode=(unsigned char)(mode&&0xFF);
+    this->mode=(unsigned char)(mode&0xFF);
     save();
   }    
 }

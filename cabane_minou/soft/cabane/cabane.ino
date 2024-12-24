@@ -10,7 +10,6 @@
 #include "dhtval.hpp"
 #include "scheduler.h"
 //#include "ldstrip.hpp"
-#include "ldanim.h"
 #include "when.hpp"
 #include "mem.h"
 
@@ -18,6 +17,7 @@
 #include <DHT.h>
 #include <Wire.h>
 #include <Adafruit_SSD1306.h>
+#include "ldanim.hpp"
 
 
 /**
@@ -26,24 +26,23 @@
 */
 #define POWER_MAX         80
 #define POWER_MIN         50
-#define NB_LEDS_CABANE    26
-#define NB_LEDS_TOUR      34
 
 int g_power=POWER_MIN;
-LdAnim<PIN_OUT_LEDS_BAS, PIN_OUT_5V_LEDS_BAS, NB_LEDS_CABANE> ldBas;
-LdAnim<PIN_OUT_LEDS_HAUT, PIN_OUT_5V_LEDS_HAUT, NB_LEDS_CABANE> ldHaut;
-LdAnim<PIN_OUT_LEDS_TOUR, PIN_OUT_5V_LEDS_TOUR, NB_LEDS_TOUR> ldTour;
+LdStrip<PIN_OUT_LEDS_BAS, PIN_OUT_5V_LEDS_BAS, NB_LEDS_CABANE> ldBas;
+LdStrip<PIN_OUT_LEDS_HAUT, PIN_OUT_5V_LEDS_HAUT, NB_LEDS_CABANE> ldHaut;
+LdStrip<PIN_OUT_LEDS_TOUR, PIN_OUT_5V_LEDS_TOUR, NB_LEDS_TOUR> ldTour;
+LdStrip<PIN_OUT_LEDS_RES, PIN_OUT_5V_LEDS_RES, NB_LEDS_TOUR> ldRes;
 
-/*LdAnim animBas;
-LdAnim animHaut;
-LdAnim animTour;*/
+//#define SIZE_PROG (500)
+//char prog[SIZE_PROG] = "S26E33LrOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LgOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOWS26E33LbOS1E23X200LgOWLrOWLbOWLgOWLrOWLbOW*";
+
 
 /**
  * @}
 */
 Timer tmrTemp(1000,false);
 Timer tmrRefresh(2000,false);
-Timer tmrPresence(10000,true);
+Timer tmrPresence(20000,true);
 Timer tmrOutOffBoot(4000,true);
 
 Scheduler scheduler;
@@ -59,10 +58,6 @@ DhtVal g_hum_ext;
 DhtVal g_temp_bas;
 DhtVal g_hum_bas;
 
-#define NB_LEDS_HAUT  (10)
-#define NB_LEDS_BAS   (10)
-#define NB_LEDS_TOUR  (10)
-
 Move moveBas;
 Move moveHaut;
 
@@ -77,10 +72,10 @@ bool g_presence_tour=false;
 #define MODE_NORMAL   0
 int g_mode;
 
-#define AFF_OFF       0
-#define AFF_BOOT      1
-#define AFF_DEMO      2
-#define AFF_AUTO      3
+#define AFF_OFF         0
+#define AFF_DEMO        1
+#define AFF_AUTO        2
+#define AFF_GUIRLANDE   3
 int g_aff;
 
 inline void _init_output_low(int pin)
@@ -98,29 +93,6 @@ inline void _init_input_pullup(int pin)
 {
   pinMode(pin,INPUT_PULLUP);
 }
-
-/**
- * @brief Allume toutes les LEDs avec la couleur fournie
- * @param pLeds Buffer des LEDs
- * @param a Couleur
-*/
-/*void setAll(CRGB *pLeds,CRGB a)
-{
-  for (int i=0;i<NUM_LEDS;i++)
-  {
-     pLeds[i] = a;
-  }
-}*/
-
-/**
- * @brief Eteint toutes les LEDs
- * @param pLeds Buffer des LEDs 
-*/
-/*void clearAll(CRGB *pLeds)
-{
-  setAll(pLeds,CRGB::Black);
-}*/
-
 
 void setup() 
 {  
@@ -166,6 +138,8 @@ void setup()
   g_mode=MODE_NORMAL;  
   mem.load();  
   g_aff=mem.getMode();
+  Serial.print("Mode ");
+  Serial.println(g_aff);
   
   dht_ext.begin();
   _init_input_pullup(PIN_IN_TEMP_EXT);
@@ -176,10 +150,6 @@ void setup()
   scheduler.begin();
   
   scr.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-  //scr.clearDisplay();
-  //scr.display();
-
-  //delay(500);  
   scr.clearDisplay();
   scr.setTextSize(2);
   scr.setTextColor(WHITE);
@@ -200,10 +170,13 @@ void setup()
   ldBas.begin();
   ldHaut.begin();
   ldTour.begin();
+  ldRes.begin();
 
   ldBas.setrg();
   ldHaut.setrg();
   ldTour.setrg();
+  ldRes.setrg();
+
   FastLED.setBrightness(g_power);
   FastLED.show();
 
@@ -221,64 +194,101 @@ void _manage_mode_test(void)
 
 void _aff_auto(void)
 {
-  static bool pile=false;
-  static bool demi=false;
-  
   DateTime dte=scheduler.nowLocal();
   When w(dte);
-        
-  if (w.isSoiree())
-  {
-    Serial.println("Soiree");
-    ldBas.pwron();
-          
-    if (w.isPile())
-    {
-      if (pile==false)
-      {
-        pile=true;
-        //animHaut.init(progPileHaut,strlen(progPileHaut));
-        //animTour.init(progPileTour,strlen(progPileTour));        
-      }
 
-      //animHaut.tick();
-      //animTour.tick();
-    }
-    else
-    {
-      pile=false;
-    }
+  if (w.isSoiree() && (g_capot))
+  {
+    ldBas.pwron();
+    ldHaut.pwron();
+    ldTour.pwron();
+        
+    ldHaut.clrall();
+    ldTour.clrall();
+    ldBas.setall(COL_GREEN);
+  }
+  else if (w.isSoiree())
+  {
+    ldBas.pwron();
+    ldHaut.pwron();
+    ldTour.pwron();
           
-    if (w.isDemi())
-    {
-      /// animer demi
-    }
-    
-    if (g_presence_bas)
+    if (w.isPile() || w.isDemi())
     {
       ldBas.setall(COL_BLACK);
-      ldHaut.setall(COL_BLACK);
-      ldTour.setall(COL_RED);  
-    }
-    else if (g_presence_haut)
-    {
-      ldBas.setall(COL_BLACK);
-      ldHaut.setall(COL_GREEN);
-      ldTour.setall(COL_RED);
+      ldHaut.setall(COL_BLUE);
+      ldTour.setall(COL_BLUE);
     }
     else
     {
-      Serial.println("normal");
-      ldBas.setall(COL_RED);
-      ldHaut.setall(COL_BLUE);
-      ldTour.setall(COL_GREEN);
-    }    
+      if (g_presence_bas)
+      {
+        ldBas.setall(COL_BLACK);
+        ldHaut.setall(COL_BLACK);
+        ldTour.setall(COL_RED);
+      }
+      else if (g_presence_haut)
+      {
+        ldBas.setall(COL_RED);
+        ldHaut.setall(COL_GREEN);
+        ldTour.setall(COL_RED);
+      }
+      else if (g_presence_tour)
+      {
+        ldBas.setall(COL_RED);
+        ldHaut.setall(COL_RED);
+        ldTour.setall(COL_GREEN);
+      }
+      else
+      {
+        ldBas.setall(COL_BLACK);
+        ldHaut.setall(COL_BLACK);
+        ldTour.setall(COL_RED);
+      }
+    }
   }
   else
   {
-    Serial.println("Journee");
+    ldBas.clrall();
+    ldHaut.clrall();
+    ldTour.clrall();
+    ldRes.clrall();
+
     ldBas.pwroff();
+    ldHaut.pwroff();
+    ldTour.pwroff();
+    ldRes.pwroff();
   }  
+}
+
+void _aff_guirlande(void)
+{
+  DateTime dte=scheduler.nowLocal();
+  When w(dte);
+
+  if (w.isSoiree())
+  {
+    ldBas.pwron();
+    ldHaut.pwron();
+    ldTour.pwron();
+
+    ldBas.clrall();
+    ldHaut.clrall();
+    ldTour.clrall();
+    ldRes.clrall();
+  }
+  else
+  {
+    ldBas.clrall();
+    ldHaut.clrall();
+    ldTour.clrall();
+    ldRes.clrall();
+
+    ldBas.pwroff();
+    ldHaut.pwroff();
+    ldTour.pwroff();
+    ldRes.pwroff();
+  }
 }
 
 void _manage_mode_normal(void)
@@ -299,21 +309,28 @@ void _manage_mode_normal(void)
       _aff_auto();
       break;
     }
+
+    case AFF_GUIRLANDE:
+    {
+      _aff_guirlande();
+      break;
+    }
   }
   
 }
 
-void loop() 
+void loop()
 {
-  delay(100);
+  delay(10);
 
-  g_capot=(digitalRead(PIN_IN_CAPOT)==LOW)?true:false;
-  g_veilleuse=!g_capot;
+  g_capot=(digitalRead(PIN_IN_CAPOT)==LOW)?false:true;
+  g_veilleuse=g_capot;
 
   if (moveBas.tick())
   {
     g_presence_bas=true;
     g_presence_haut=false;
+    moveHaut.reset();
     tmrPresence.start();
   }  
   
@@ -321,6 +338,7 @@ void loop()
   {
     g_presence_haut=true;
     g_presence_bas=false;
+    moveBas.reset();
     tmrPresence.start();
   }
 
@@ -335,7 +353,6 @@ void loop()
   if (tmrTemp.tick()==true)
   {
     digitalWrite(PIN_OUT_LED1,!digitalRead(PIN_OUT_LED1));
-    //digitalWrite(PIN_OUT_5V_LEDS_TOUR,!digitalRead(PIN_OUT_5V_LEDS_TOUR));
 
     float val=dht_ext.readTemperature();
     g_temp_ext.set(val);
@@ -360,6 +377,33 @@ void loop()
       {
         _manage_mode_normal();
       }
+
+      scr.clearDisplay();
+      scr.setTextSize(2);
+      scr.setTextColor(WHITE);
+
+      char tmp[20];
+      char s1[10];
+      char s2[10];
+
+      sprintf(tmp,"Mode: %d",g_aff);
+      scr.setCursor(5,10);
+      scr.write(tmp);
+
+      scr.setTextSize(1);
+      g_temp_ext.getStr(s1);
+      g_hum_ext.getStr(s2);
+      sprintf(tmp,"Ext: %s%cC / %s%%",s1,248,s2);
+      scr.setCursor(5,35);
+      scr.write(tmp);
+
+      g_temp_bas.getStr(s1);
+      g_hum_bas.getStr(s2);
+      sprintf(tmp,"Bas: %s%cC / %s%%",s1,248,s2);
+      scr.setCursor(5,50);
+      scr.write(tmp);
+
+      scr.display();
     }
 
     FastLED.show();

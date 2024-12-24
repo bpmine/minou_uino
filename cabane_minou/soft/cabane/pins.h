@@ -1,6 +1,11 @@
 #ifndef PINS_HEADER_INCLUDED
 #define PINS_HEADER_INCLUDED
 
+/// Total: 338mA x 2 + 442mA = 1,2 A
+#define NB_LEDS_CABANE    26        ///< 13mA x 26 LEDs = 338mA
+#define NB_LEDS_TOUR      34        ///< 13mA x 34 LEDs = 442mA
+
+
 #define PIN_IN_SW1_BUTTON             (40)
 #define PIN_IN_SW2_BUTTON             (3)
 #define PIN_IN_SW3_BUTTON             (5)
@@ -17,8 +22,8 @@
 #define PIN_IO1                       (7)
 #define PIN_IO2                       (9)
 
-#define PIN_OUT_LEDS_TOUR             (22)
-#define PIN_OUT_LEDS_RES              (26)
+#define PIN_OUT_LEDS_TOUR             (23)
+#define PIN_OUT_LEDS_RES              (25)
 #define PIN_OUT_LEDS_HAUT             (29)
 #define PIN_OUT_LEDS_BAS              (31)
 #define PIN_OUT_3V_ESP                (41)
