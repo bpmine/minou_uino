@@ -1290,8 +1290,8 @@
     (uuid fe565d2b-a7cd-4676-a001-8a6245c201e2)
   )
 
-  (text "Erreur Q6: Pas la bonne empreinte MOS Nau lieu d'un P !!!!!\nTH1 pas assez large + trous trops fins\nD9 et D4 trop grands + trous trops gros\nEmpreintes de R22, R23, R28, R29, R30 et R31 de 10 Ohms trop petites au moins 10mm \nModifier J14 pour être de même type que les autres\nMettre 100 nF sur Q5 comme pour les autres\nMettre une pullup de 10k sur les entrées temp (avant la 10R cote DHT)\nLes transistors PNP BC827 ne sont pas suffisants pour alimenter les strips LEDs !!\n"
-    (at 90.17 162.56 0)
+  (text "Erreur Q6: Pas la bonne empreinte MOS Nau lieu d'un P !!!!!\nTH1 pas assez large + trous trops fins\nD9 et D4 trop grands + trous trops gros\nEmpreintes de R22, R23, R28, R29, R30 et R31 de 10 Ohms trop petites au moins 10mm \nModifier J14 pour être de même type que les autres\nMettre 100 nF sur Q5 comme pour les autres\nMettre une pullup de 10k sur les entrées temp (avant la 10R cote DHT)\nLes transistors PNP BC827 ne sont pas suffisants pour alimenter les strips LEDs !!\nR49 à R49 doivent être de 330 R pour protéger mieux\nDécoupler les alims DHT (connecteurs correspondants avec 10µF / 100nF)\nLe HC05 TX ne marche pas (conflit avec le chip USB ?)\nLes alimentations des STRIPLEDs ne sont pas assez puissantes !"
+    (at 78.74 172.72 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 1e75be60-8ddf-44c9-92f5-603bcda4c937)
   )
